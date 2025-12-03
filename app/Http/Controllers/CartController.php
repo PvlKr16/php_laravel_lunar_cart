@@ -47,10 +47,13 @@ class CartController extends Controller
             'id' => $cart->id,
 
             'items' => $cart->lines->map(function ($line) {
+                $price = $line->purchasable->prices->first()->price->value;
+                $lineTotal = number_format(($price * $line->quantity) / 100, 2);
+
                 return [
                     'id' => $line->id,
                     'quantity' => $line->quantity,
-                    'line_total' => $line->total?->formatted,
+                    'line_total' => $lineTotal,
                     'product' => [
                         'name' => $line->purchasable
                             ->product
