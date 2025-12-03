@@ -190,6 +190,11 @@ class LunarProductSeeder extends Seeder
                 ],
             ]);
 
+            $product
+                ->addMedia(database_path('seeders/images/IMG_9327.jpg'))
+                ->preservingOriginal()
+                ->toMediaCollection('images');
+
             /**
              * VARIANT
              */
@@ -201,10 +206,6 @@ class LunarProductSeeder extends Seeder
                 'stock' => $stock,
                 'backorder' => 0,
             ]);
-
-//            $variant->channels()->syncWithoutDetaching([
-//                $channel->id => ['enabled' => true]
-//            ]);
 
             /**
              * CHANNEL AVAILABILITY

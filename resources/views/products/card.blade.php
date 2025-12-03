@@ -8,6 +8,9 @@
 <div style="border:1px solid #ddd; padding:15px; text-align:center;">
     <h3>{{ $product->translateAttribute('name') }}</h3>
 
+    <img src="{{ $product->media->first()->getUrl() }}" alt="{{ $product->translate('name') }}"
+         width="150" height='auto'>
+
     <p><strong>Price:</strong> {{ $amount }} USD</p>
     <div id="stock-{{ $variant->id }}">
         In stock: {{ $variant->stock }}
