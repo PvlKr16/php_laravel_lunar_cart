@@ -41,15 +41,42 @@
             const div = document.createElement('div');
             div.className = 'cart-item';
             div.innerHTML = `
-                <div class="meta">
-                    <div class="title">${item.product.name}</div>
-                    <div>Quantity: ${item.quantity}</div>
-                    <div>${item.line_total}</div>
-                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
 
-                <button data-action="remove" data-id="${item.id}" class="small" style="margin-left:auto;">
-                    Remove
-                </button>
+                    <!-- BLOCK FOR IMAGE (20x30) -->
+                    <div style="
+                        position: relative;
+                        width: 20px;
+                        height: 30px;
+                        border: 1px solid #ccc;
+                    ">
+                        <!-- REMOVE BUTTON INSIDE IMAGE BLOCK -->
+                        <button
+                            data-action="remove"
+                            data-id="${item.id}"
+                            style="
+                                position:absolute;
+                                top:-8px;
+                                left:-8px;
+                                width:16px;
+                                height:16px;
+                                border:none;
+                                background:#f44336;
+                                color:#fff;
+                                font-size:10px;
+                                border-radius:50%;
+                                cursor:pointer;
+                            "
+                        >✕</button>
+                    </div>
+
+                    <!-- META -->
+                    <div class="meta">
+                        <div class="title">${item.product.name}</div>
+                        <div>Quantity: ${item.quantity}</div>
+                        <div>${item.line_total}</div>
+                    </div>
+                </div>
             `;
             itemsBox.appendChild(div);
         });
