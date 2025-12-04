@@ -101,6 +101,74 @@ class CartController extends Controller
     }
 
     /**
+     * Updating cart
+     */
+    public function update(Request $request)
+    {
+        $request->validate([
+            'line_id' => 'required|integer',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $lineId = $request->line_id;
+        $newQty = $request->quantity;
+
+        // Getting current cart
+        $cart = \Lunar\Facades\CartSession::current();
+
+        // Cart line detecting
+        $line = $cart->lines()->where('id', $lineId)->first();
+
+        if (!$line) {
+            return response()->json(['error' => 'Cart line not found'], 404);
+        }
+
+        $variant = $line->purchasable;
+
+        if (!$variant) {
+            return response()->json(['error' => 'Variant not found'], 404);
+        }
+
+        $oldQty = $line->quantity;
+        $diff   = $newQty - $oldQty;
+
+        // increasing → stock is decreased
+        if ($diff > 0) {
+            if ($variant->stock < $diff) {
+                return response()->json([
+                    'error' => 'Not enough stock',
+                    'stock' => $variant->stock
+                ], 422);
+            }
+            $variant->stock -= $diff;
+        }
+        // decreasing → back to stock
+        else {
+            $variant->stock += abs($diff);
+        }
+
+        $variant->save();
+
+        // Cart lines updating
+        $line->quantity = $newQty;
+        $line->save();
+
+        // cart updating (Lunar recalculates totals and lines)
+        $cart = $cart->refresh();
+
+        // updated line (after refresh)
+        $updatedLine = $cart->lines()->find($lineId);
+
+        return response()->json([
+            'success'     => true,
+            'line_total'  => $updatedLine->total?->formatted ?? '0.00',
+            'total'       => $cart->total?->formatted ?? '0.00',
+            'variant_id'  => $variant->id,
+            'new_stock'   => $variant->stock,
+        ]);
+    }
+
+    /**
      * Remove line from cart
      */
     public function remove(Request $request)
