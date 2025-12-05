@@ -1,9 +1,9 @@
 (function () {
-    const panel = document.getElementById('cart-panel');
-    const overlay = document.getElementById('cart-overlay');
-    const closeBtn = document.getElementById('cart-close');
-    const itemsBox = document.getElementById('cart-items');
-    const totalBox = document.getElementById('cart-total');
+    const panel = document.getElementById("cart-panel");
+    const overlay = document.getElementById("cart-overlay");
+    const closeBtn = document.getElementById("cart-close");
+    const itemsBox = document.getElementById("cart-items");
+    const totalBox = document.getElementById("cart-total");
 
     const csrfMeta = document.querySelector('meta[name="csrf-token"]');
     const csrf = csrfMeta ? csrfMeta.content : null;
@@ -14,12 +14,12 @@
 
     function setOpen(open) {
         if (open) {
-            panel.classList.add('active');
-            overlay.classList.add('active');
+            panel.classList.add("active");
+            overlay.classList.add("active");
             loadCart();
         } else {
-            panel.classList.remove('active');
-            overlay.classList.remove('active');
+            panel.classList.remove("active");
+            overlay.classList.remove("active");
         }
     }
 
@@ -27,56 +27,95 @@
     if (closeBtn) closeBtn.onclick = () => setOpen(false);
     if (overlay) overlay.onclick = () => setOpen(false);
 
+    //
+    // ---------------------------
+    // Currency helper
+    // ---------------------------
+    //
+    function detectCurrency(value, fallback = "$") {
+        if (!value) return fallback;
+
+        const m = value.match(/^[^\d]+/); // everything before first digit
+        return m ? m[0] : fallback;
+    }
+
+    //
+    // ---------------------------
+    // LOAD CART
+    // ---------------------------
+    //
     async function loadCart() {
-        debug("Loading cart (/cart)...");
+        debug("Loading cart...");
+
         try {
-            const res = await fetch('/cart', { credentials: 'same-origin' });
+            const res = await fetch("/cart", { credentials: "same-origin" });
             const text = await res.text();
-            debug("/cart status:", res.status, "response text:", text);
+
             let data;
-            try { data = JSON.parse(text); } catch (err) {
-                console.error("Failed to parse /cart response as JSON:", err);
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                console.error("Invalid JSON from /cart:", text);
                 return;
             }
-            debug("CART DATA:", data);
+
             render(data);
         } catch (err) {
-            console.error("Error loading cart:", err);
+            console.error("loadCart error:", err);
         }
     }
 
+    //
+    // ---------------------------
+    // RENDER CART
+    // ---------------------------
+    //
     function render(data) {
-        itemsBox.innerHTML = '';
+        itemsBox.innerHTML = "";
 
         if (!data.items || !data.items.length) {
-            itemsBox.innerHTML = '<p>Cart is empty</p>';
-            totalBox.textContent = 'Total: 0';
+            itemsBox.innerHTML = "<p>Cart is empty</p>";
+            totalBox.textContent = "Total: 0";
             return;
         }
 
-        data.items.forEach(item => {
-            // USE item.id as line id (based on previous inspection)
+        const currency = detectCurrency(
+            data.total?.formatted ?? data.total,
+            "$"
+        );
+
+        data.items.forEach((item) => {
             const lid = item.id;
-            const div = document.createElement('div');
-            div.className = 'cart-item';
+
+            const lineCurrency = detectCurrency(item.line_total, currency);
+
+            const div = document.createElement("div");
+            div.className = "cart-item";
 
             div.innerHTML = `
                 <div style="display:flex; align-items:center; gap:12px; width:100%;">
 
-                    <div style="position: relative; width: 20px; height: 30px; border: 1px solid #ccc;">
-                        <button
-                            data-action="remove"
-                            data-id="${lid}"
-                            title="Remove"
-                            style="position:absolute; top:-8px; left:-8px; width:16px; height:16px; border:none; background:#f44336; color:#fff; font-size:10px; border-radius:50%; cursor:pointer;"
-                        >✕</button>
-                    </div>
+                    <button
+                        data-action="remove"
+                        data-id="${lid}"
+                        title="Remove"
+                        style="width:18px; height:18px; border:none; background:#f44336; color:#fff; font-size:10px; border-radius:50%; cursor:pointer;"
+                    >✕</button>
 
-                    <div style="display:flex; flex-direction:column; flex-grow:1;">
+                    <div style="flex-grow:1;">
                         <div style="display:flex; justify-content:space-between;">
-                            <div class="title">${(item.product && item.product.name) ? item.product.name : 'Product'}</div>
+                            <div class="title">${
+                item.product?.name ?? "Product"
+            }</div>
+
                             <div class="line-total" id="line-total-${lid}">
-                                ${item.line_total ?? ''}
+                                ${
+                                    (function() {
+                                        const lt = item.line_total ?? '';
+                                        const currency = detectCurrency(lt, detectCurrency(data.total));
+                                        return lt.startsWith(currency) ? lt : currency + lt;
+                                    })()
+                                }
                             </div>
                         </div>
 
@@ -101,219 +140,214 @@
             itemsBox.appendChild(div);
         });
 
-        totalBox.textContent = 'Total: ' + (data.total ?? '');
-    }
+        // FIXED: always show currency
+        let totalFormatted = data.total?.formatted ?? data.total ?? "0";
 
-    window.addToCartWithQty = async function (variantId) {
-        const qtyInput = document.getElementById('qty-' + variantId);
-        const msg = document.getElementById('msg-' + variantId);
-
-        if (!qtyInput) {
-            console.warn("addToCartWithQty: qty input not found for variant", variantId);
-            return;
+        if (!totalFormatted.startsWith(currency)) {
+            totalFormatted = currency + totalFormatted;
         }
 
-        const qty = parseInt(qtyInput.value) || 1;
-        msg && (msg.textContent = '');
+        totalBox.textContent = "Total: " + totalFormatted;
+    }
 
-        debug("POST /cart/add", { variant_id: variantId, quantity: qty });
+    //
+    // ---------------------------
+    // ADD TO CART
+    // ---------------------------
+    //
+    window.addToCartWithQty = async function (variantId) {
+        const qtyInput = document.getElementById("qty-" + variantId);
+        const msg = document.getElementById("msg-" + variantId);
+
+        if (!qtyInput) return;
+
+        const qty = parseInt(qtyInput.value) || 1;
+        msg && (msg.textContent = "");
 
         try {
-            const res = await fetch('/cart/add', {
-                method: 'POST',
+            const res = await fetch("/cart/add", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrf
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrf,
                 },
-                credentials: 'same-origin',
+                credentials: "same-origin",
                 body: JSON.stringify({
                     variant_id: variantId,
-                    quantity: qty
-                })
+                    quantity: qty,
+                }),
             });
 
-            const text = await res.text();
-            debug("/cart/add status:", res.status, "response:", text);
-            let data;
-            try { data = JSON.parse(text); } catch (err) { data = null; }
+            const data = await res.json().catch(() => null);
 
             if (!res.ok) {
-                console.warn("/cart/add failed:", res.status, data);
-                msg && (msg.textContent = (data && data.error) ? data.error : "Error");
+                msg.textContent = data?.error ?? "Error";
                 return;
             }
 
-            if (data && data.new_stock !== undefined) {
+            if (data?.new_stock !== undefined) {
                 updateStockOnPage(variantId, data.new_stock);
             }
 
             openCart();
         } catch (err) {
-            console.error("addToCartWithQty error:", err);
+            console.error(err);
         }
     };
 
+    //
+    // ---------------------------
+    // UPDATE CART QTY
+    // ---------------------------
+    //
     window.updateCartQty = async function (lineId, newQty) {
-        debug("updateCartQty called", { lineId, newQty });
-
         try {
-            const res = await fetch('/cart/update', {
-                method: 'POST',
+            const res = await fetch("/cart/update", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrf
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrf,
                 },
-                credentials: 'same-origin',
+                credentials: "same-origin",
                 body: JSON.stringify({
                     line_id: lineId,
-                    quantity: newQty
-                })
+                    quantity: newQty,
+                }),
             });
 
-            const text = await res.text();
-            debug("/cart/update status:", res.status, "raw response:", text);
+            const data = await res.json().catch(() => null);
 
-            let data = null;
-            try { data = JSON.parse(text); debug("parsed /cart/update response:", data); } catch (err) { debug("Failed to parse /cart/update as JSON:", err); }
+            if (!res.ok) return;
 
-            if (!res.ok) {
-                // Try to show helpful message
-                const errMsg = data && data.error ? data.error : `HTTP ${res.status}`;
-                console.warn("/cart/update failed:", errMsg);
-                // bubble up error to caller
-                return { ok: false, status: res.status, data };
+            //
+            // 1. Update line total
+            //
+            if (data.line_total !== undefined) {
+                let cur = detectCurrency(data.line_total);
+                let lt = data.line_total;
+
+                if (!lt.startsWith(cur)) lt = cur + lt;
+
+                document.getElementById("line-total-" + lineId).textContent = lt;
             }
 
-            // If the server returned useful values, update small bits immediately
-            if (data) {
-                if (data.line_total !== undefined) {
-                    const el = document.getElementById('line-total-' + lineId);
-                    if (el) el.textContent = data.line_total;
-                }
-                if (data.total !== undefined) {
-                    const cartTotalEl = document.getElementById('cart-total') || totalBox;
-                    cartTotalEl.textContent = 'Total: ' + data.total;
-                }
-                if (data.variant_id !== undefined && data.new_stock !== undefined) {
-                    updateStockOnPage(data.variant_id, data.new_stock);
-                }
+            //
+            // 2. Update total
+            //
+            if (data.total !== undefined) {
+                let cur = detectCurrency(data.total);
+                let tt = data.total;
+
+                if (!tt.startsWith(cur)) tt = cur + tt;
+
+                totalBox.textContent = "Total: " + tt;
             }
 
-            // return parsed data
-            return { ok: true, status: res.status, data };
+            //
+            // 3. Update stock
+            //
+            if (data.variant_id && data.new_stock !== undefined) {
+                updateStockOnPage(data.variant_id, data.new_stock);
+            }
+
         } catch (err) {
-            console.error("updateCartQty error:", err);
-            return { ok: false, status: 0, error: err };
+            console.error("updateCartQty error", err);
         }
     };
 
+    //
+    // ---------------------------
+    // REMOVE FROM CART
+    // ---------------------------
+    //
     window.removeFromCart = async function (lineId) {
-        debug("removeFromCart", lineId);
         try {
-            const res = await fetch('/cart/remove', {
-                method: 'POST',
+            const res = await fetch("/cart/remove", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrf
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrf,
                 },
-                credentials: 'same-origin',
-                body: JSON.stringify({ line_id: lineId })
+                credentials: "same-origin",
+                body: JSON.stringify({ line_id: lineId }),
             });
 
-            const text = await res.text();
-            debug("/cart/remove status:", res.status, "response:", text);
-            let data;
-            try { data = JSON.parse(text); } catch (err) { data = null; }
+            const data = await res.json().catch(() => null);
 
-            if (data && data.new_stock !== undefined && data.variant_id !== undefined) {
+            if (data?.variant_id && data?.new_stock !== undefined) {
                 updateStockOnPage(data.variant_id, data.new_stock);
             }
 
             loadCart();
         } catch (err) {
-            console.error("removeFromCart error:", err);
+            console.error(err);
         }
     };
 
+    //
+    // ---------------------------
+    // UPDATE STOCK IN DOM
+    // ---------------------------
+    //
     window.updateStockOnPage = function (variantId, newStock) {
-        debug("updateStockOnPage", variantId, newStock);
-        const stockDiv = document.getElementById('stock-' + variantId);
-        const qtyInput = document.getElementById('qty-' + variantId);
-        const btn = document.getElementById('btn-' + variantId);
+        const stockDiv = document.getElementById("stock-" + variantId);
+        const qtyInput = document.getElementById("qty-" + variantId);
+        const btn = document.getElementById("btn-" + variantId);
 
-        if (stockDiv) stockDiv.textContent = 'Available: ' + newStock;
+        if (stockDiv) stockDiv.textContent = "Available: " + newStock;
 
         if (qtyInput) {
             qtyInput.max = newStock;
-            if (parseInt(qtyInput.value) > newStock) qtyInput.value = newStock;
+            if (qtyInput.value > newStock) qtyInput.value = newStock;
         }
 
-        if (newStock <= 0) {
-            if (qtyInput) qtyInput.disabled = true;
-            if (btn) { btn.disabled = true; btn.textContent = 'Not available'; }
-        } else {
-            if (qtyInput) qtyInput.disabled = false;
-            if (btn) { btn.disabled = false; btn.textContent = 'Add to cart'; }
+        if (btn) {
+            if (newStock <= 0) {
+                btn.disabled = true;
+                btn.textContent = "Not available";
+            } else {
+                btn.disabled = false;
+                btn.textContent = "Add to cart";
+            }
         }
     };
 
-    itemsBox.addEventListener('click', async function (e) {
-        const btn = e.target.closest('[data-action]');
+    //
+    // BUTTON HANDLERS
+    //
+    itemsBox.addEventListener("click", async function (e) {
+        const btn = e.target.closest("[data-action]");
         if (!btn) return;
+
         const id = btn.dataset.id;
-        debug("clicked button", btn.dataset.action, "id:", id);
+        const action = btn.dataset.action;
 
-        if (btn.dataset.action === 'remove') {
-            return removeFromCart(id);
-        }
+        if (action === "remove") return removeFromCart(id);
 
-        if (btn.dataset.action === 'increase') {
-            const input = document.getElementById('qty-input-' + id);
-            if (!input) { console.warn("qty input not found for id", id); return; }
-            input.value = parseInt(input.value || 0) + 1;
-            const result = await updateCartQty(id, parseInt(input.value));
-            debug("updateCartQty result (increase):", result);
-            // If server did not respond OK, reload to restore correct state
-            if (!result || !result.ok) {
-                console.warn("server didn't accept update; reloading cart");
-                loadCart();
-            } else {
-                // ensure UI stays consistent with server
-                loadCart();
-            }
-        }
+        const input = document.getElementById("qty-input-" + id);
+        if (!input) return;
 
-        if (btn.dataset.action === 'decrease') {
-            const input = document.getElementById('qty-input-' + id);
-            if (!input) { console.warn("qty input not found for id", id); return; }
-            let current = parseInt(input.value || 0);
-            if (current > 1) {
-                input.value = current - 1;
-                const result = await updateCartQty(id, parseInt(input.value));
-                debug("updateCartQty result (decrease):", result);
-                if (!result || !result.ok) {
-                    console.warn("server didn't accept update; reloading cart");
-                    loadCart();
-                } else {
-                    loadCart();
-                }
-            }
-        }
+        let qty = parseInt(input.value);
+
+        if (action === "increase") qty++;
+        if (action === "decrease") qty = Math.max(1, qty - 1);
+
+        input.value = qty;
+
+        await updateCartQty(id, qty);
+        loadCart(); // refresh view after update
     });
 
-    itemsBox.addEventListener('change', async function (e) {
-        if (e.target.classList.contains('qty-input')) {
-            const id = e.target.dataset.lineId;
-            let val = parseInt(e.target.value || 0);
-            if (val < 1) val = 1;
-            e.target.value = val;
-            const result = await updateCartQty(id, val);
-            debug("updateCartQty result (change):", result);
-            loadCart();
-        }
+    itemsBox.addEventListener("change", async function (e) {
+        if (!e.target.classList.contains("qty-input")) return;
+
+        const id = e.target.dataset.lineId;
+        let qty = Math.max(1, parseInt(e.target.value));
+        e.target.value = qty;
+
+        await updateCartQty(id, qty);
+        loadCart();
     });
 
-    // initial load if cart panel already open
-    if (panel && panel.classList.contains('active')) loadCart();
-
+    if (panel.classList.contains("active")) loadCart();
 })();
