@@ -27,11 +27,9 @@
     if (closeBtn) closeBtn.onclick = () => setOpen(false);
     if (overlay) overlay.onclick = () => setOpen(false);
 
-    //
-    // ---------------------------
-    // Currency helper
-    // ---------------------------
-    //
+    /*
+    / Currency helper
+    */
     function detectCurrency(value, fallback = "$") {
         if (!value) return fallback;
 
@@ -39,11 +37,16 @@
         return m ? m[0] : fallback;
     }
 
-    //
-    // ---------------------------
-    // LOAD CART
-    // ---------------------------
-    //
+    function formatWithCurrency(value, fallbackCurrency = "$") {
+        if (!value) return fallbackCurrency + "0";
+
+        const cur = detectCurrency(value, fallbackCurrency);
+        return value.startsWith(cur) ? value : cur + value;
+    }
+
+    /*
+    / LOAD CART
+    */
     async function loadCart() {
         debug("Loading cart...");
 
@@ -65,11 +68,9 @@
         }
     }
 
-    //
-    // ---------------------------
-    // RENDER CART
-    // ---------------------------
-    //
+    /*
+    / RENDER CART
+    */
     function render(data) {
         itemsBox.innerHTML = "";
 
@@ -109,13 +110,7 @@
             }</div>
 
                             <div class="line-total" id="line-total-${lid}">
-                                ${
-                                    (function() {
-                                        const lt = item.line_total ?? '';
-                                        const currency = detectCurrency(lt, detectCurrency(data.total));
-                                        return lt.startsWith(currency) ? lt : currency + lt;
-                                    })()
-                                }
+                                ${formatWithCurrency(item.line_total, detectCurrency(data.total))}
                             </div>
                         </div>
 
@@ -141,20 +136,13 @@
         });
 
         // FIXED: always show currency
-        let totalFormatted = data.total?.formatted ?? data.total ?? "0";
-
-        if (!totalFormatted.startsWith(currency)) {
-            totalFormatted = currency + totalFormatted;
-        }
-
-        totalBox.textContent = "Total: " + totalFormatted;
+        totalBox.textContent = "Total: " +
+            formatWithCurrency(data.total?.formatted ?? data.total, currency);
     }
 
-    //
-    // ---------------------------
-    // ADD TO CART
-    // ---------------------------
-    //
+    /*
+    / ADD TO CART
+    */
     window.addToCartWithQty = async function (variantId) {
         const qtyInput = document.getElementById("qty-" + variantId);
         const msg = document.getElementById("msg-" + variantId);
@@ -195,11 +183,9 @@
         }
     };
 
-    //
-    // ---------------------------
-    // UPDATE CART QTY
-    // ---------------------------
-    //
+    /*
+    / UPDATE CART QTY
+    */
     window.updateCartQty = async function (lineId, newQty) {
         try {
             const res = await fetch("/cart/update", {
@@ -219,33 +205,17 @@
 
             if (!res.ok) return;
 
-            //
-            // 1. Update line total
-            //
+            // Update line total
             if (data.line_total !== undefined) {
-                let cur = detectCurrency(data.line_total);
-                let lt = data.line_total;
-
-                if (!lt.startsWith(cur)) lt = cur + lt;
-
-                document.getElementById("line-total-" + lineId).textContent = lt;
+                document.getElementById("line-total-" + lineId).textContent =
+                    formatWithCurrency(data.line_total);
             }
 
-            //
-            // 2. Update total
-            //
             if (data.total !== undefined) {
-                let cur = detectCurrency(data.total);
-                let tt = data.total;
-
-                if (!tt.startsWith(cur)) tt = cur + tt;
-
-                totalBox.textContent = "Total: " + tt;
+                totalBox.textContent = "Total: " + formatWithCurrency(data.total);
             }
 
-            //
-            // 3. Update stock
-            //
+            // Update stock
             if (data.variant_id && data.new_stock !== undefined) {
                 updateStockOnPage(data.variant_id, data.new_stock);
             }
@@ -255,11 +225,9 @@
         }
     };
 
-    //
-    // ---------------------------
-    // REMOVE FROM CART
-    // ---------------------------
-    //
+    /*
+    / REMOVE FROM CART
+    */
     window.removeFromCart = async function (lineId) {
         try {
             const res = await fetch("/cart/remove", {
@@ -284,11 +252,9 @@
         }
     };
 
-    //
-    // ---------------------------
-    // UPDATE STOCK IN DOM
-    // ---------------------------
-    //
+    /*
+    / UPDATE STOCK IN DOM
+    */
     window.updateStockOnPage = function (variantId, newStock) {
         const stockDiv = document.getElementById("stock-" + variantId);
         const qtyInput = document.getElementById("qty-" + variantId);
@@ -312,9 +278,9 @@
         }
     };
 
-    //
-    // BUTTON HANDLERS
-    //
+    /*
+    / BUTTON HANDLERS
+    */
     itemsBox.addEventListener("click", async function (e) {
         const btn = e.target.closest("[data-action]");
         if (!btn) return;
@@ -331,24 +297,15 @@
 
         let qty = parseInt(input.value);
 
-        if (action === "increase") {
-            qty++;
-            input.value = qty;
-            await updateCartQty(id, qty);
-            return loadCart();
-        }
-
-        if (action === "decrease") {
-            if (qty <= 1) {
-                // qty было 1 → удаляем строку
-                return removeFromCart(id);
-            }
-
+        if (action === "increase") qty++;
+        else if (action === "decrease") {
+            if (qty <= 1) return removeFromCart(id);
             qty--;
-            input.value = qty;
-            await updateCartQty(id, qty);
-            return loadCart();
         }
+
+        input.value = qty;
+        await updateCartQty(id, qty);
+        return loadCart();
     });
 
 
