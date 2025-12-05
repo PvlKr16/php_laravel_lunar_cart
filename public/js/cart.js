@@ -322,31 +322,56 @@
         const id = btn.dataset.id;
         const action = btn.dataset.action;
 
-        if (action === "remove") return removeFromCart(id);
+        if (action === "remove") {
+            return removeFromCart(id);
+        }
 
         const input = document.getElementById("qty-input-" + id);
         if (!input) return;
 
         let qty = parseInt(input.value);
 
-        if (action === "increase") qty++;
-        if (action === "decrease") qty = Math.max(1, qty - 1);
+        if (action === "increase") {
+            qty++;
+            input.value = qty;
+            await updateCartQty(id, qty);
+            return loadCart();
+        }
 
-        input.value = qty;
+        if (action === "decrease") {
+            if (qty <= 1) {
+                // qty было 1 → удаляем строку
+                return removeFromCart(id);
+            }
 
-        await updateCartQty(id, qty);
-        loadCart(); // refresh view after update
+            qty--;
+            input.value = qty;
+            await updateCartQty(id, qty);
+            return loadCart();
+        }
     });
 
+
     itemsBox.addEventListener("change", async function (e) {
-        if (!e.target.classList.contains("qty-input")) return;
+        if (e.target.classList.contains('qty-input')) {
+            const id = e.target.dataset.lineId;
+            let val = parseInt(e.target.value || 0);
 
-        const id = e.target.dataset.lineId;
-        let qty = Math.max(1, parseInt(e.target.value));
-        e.target.value = qty;
+            if (val < 1) {
+                await removeFromCart(id);
+                return;
+            }
 
-        await updateCartQty(id, qty);
-        loadCart();
+            if (val === 1) {
+                e.target.value = 1;
+                const result = await updateCartQty(id, 1);
+                loadCart();
+                return;
+            }
+
+            const result = await updateCartQty(id, val);
+            loadCart();
+        }
     });
 
     if (panel.classList.contains("active")) loadCart();
