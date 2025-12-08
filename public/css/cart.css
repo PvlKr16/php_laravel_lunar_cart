@@ -72,3 +72,10 @@
     padding:15px;
     border-top:1px solid #ddd;
 }
+
+.price-loading {
+    background: #e0e0e0;
+    color: transparent !important;
+    border-radius: 4px;
+    transition: background 0.2s;
+}

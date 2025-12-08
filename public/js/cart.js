@@ -23,6 +23,16 @@
         }
     }
 
+    function setLoadingPrice(el) {
+        if (!el) return;
+        el.classList.add("price-loading");
+    }
+    function unsetLoadingPrice(el) {
+        if (!el) return;
+        el.classList.remove("price-loading");
+    }
+
+
     window.openCart = () => setOpen(true);
     if (closeBtn) closeBtn.onclick = () => setOpen(false);
     if (overlay) overlay.onclick = () => setOpen(false);
@@ -288,6 +298,11 @@
     / UPDATE CART QTY
     */
     window.updateCartQty = async function (lineId, newQty) {
+
+        const lineEl = document.getElementById("line-total-" + lineId);
+        setLoadingPrice(lineEl);
+        setLoadingPrice(totalBox);
+
         try {
             const res = await fetch("/cart/update", {
                 method: "POST",
@@ -303,6 +318,9 @@
             });
 
             const data = await res.json().catch(() => null);
+
+            unsetLoadingPrice(document.getElementById("line-total-" + lineId));
+            unsetLoadingPrice(totalBox);
 
             if (!res.ok) return;
 
