@@ -94,46 +94,147 @@
             div.className = "cart-item";
 
             div.innerHTML = `
-                <div style="display:flex; align-items:center; gap:12px; width:100%;">
+    <div style="display:flex; align-items:flex-start; gap:12px; width:100%; position:relative;">
 
-                    <button
-                        data-action="remove"
-                        data-id="${lid}"
-                        title="Remove"
-                        style="width:18px; height:18px; border:none; background:#f44336; color:#fff; font-size:10px; border-radius:50%; cursor:pointer;"
-                    >✕</button>
+        <!-- Блок изображения -->
+        <div style="
+            width:30px;
+            height:50px;
+            border:1px solid #ccc;
+            position:relative;
+            flex-shrink:0;
+            overflow:visible;
+        ">
+            <!-- Кнопка удаления на рамке -->
+            <button
+                data-action="remove"
+                data-id="${lid}"
+                title="Remove"
+                style="
+                    position:absolute;
+                    top:-8px;
+                    left:-8px;
+                    width:20px;
+                    height:20px;
+                    border:none;
+                    background:#f44336;
+                    color:#fff;
+                    font-size:10px;
+                    border-radius:50%;
+                    cursor:pointer;
+                    z-index:10;
+                "
+            >✕</button>
 
-                    <div style="flex-grow:1;">
-                        <div style="display:flex; justify-content:space-between;">
-                            <div class="title">${
-                item.product?.name ?? "Product"
-            }</div>
+            <img
+                src="${item.product?.thumbnail ?? '/images/no-image.png'}"
+                style="width:100%; height:100%; object-fit:cover;"
+            >
+        </div>
 
-                            <div class="line-total" id="line-total-${lid}">
-                                ${formatWithCurrency(item.line_total, detectCurrency(data.total))}
-                            </div>
-                        </div>
-
-                        <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
-                            <button data-action="decrease" data-id="${lid}" style="width:22px; height:22px; background:#ddd; border:none; cursor:pointer;">−</button>
-
-                            <input type="number"
-                                id="qty-input-${lid}"
-                                value="${item.quantity ?? 1}"
-                                min="1"
-                                class="qty-input"
-                                data-line-id="${lid}"
-                                style="width:45px; text-align:center;"
-                            >
-
-                            <button data-action="increase" data-id="${lid}" style="width:22px; height:22px; background:#ddd; border:none; cursor:pointer;">+</button>
-                        </div>
-                    </div>
+        <div style="flex-grow:1;">
+            <div style="display:flex; justify-content:space-between;">
+                <div class="title">${item.product?.name ?? "Product"}</div>
+                <div class="line-total" id="line-total-${lid}">
+                    ${formatWithCurrency(item.line_total, detectCurrency(data.total))}
                 </div>
-            `;
+            </div>
+
+            <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
+                <button data-action="decrease" data-id="${lid}" style="width:22px; height:22px; background:#ddd; border:none; cursor:pointer;">−</button>
+
+                <input type="number"
+                    id="qty-input-${lid}"
+                    value="${item.quantity ?? 1}"
+                    min="1"
+                    class="qty-input"
+                    data-line-id="${lid}"
+                    style="width:45px; text-align:center;"
+                >
+
+                <button data-action="increase" data-id="${lid}" style="width:22px; height:22px; background:#ddd; border:none; cursor:pointer;">+</button>
+            </div>
+        </div>
+    </div>
+`;
+
 
             itemsBox.appendChild(div);
         });
+
+        /*
+        / COUPON TOGGLE BLOCK (only once)
+        */
+        let couponWrapper = document.getElementById("coupon-wrapper");
+        if (!couponWrapper) {
+            couponWrapper = document.createElement("div");
+            couponWrapper.id = "coupon-wrapper";
+            couponWrapper.style.marginBottom = "12px";
+            couponWrapper.style.cursor = "pointer";
+
+            couponWrapper.innerHTML = `
+        <div id="coupon-toggle" style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:8px 0;
+            user-select:none;
+        ">
+            <span>Got a discount code?</span>
+            <span id="coupon-arrow" style="transition:0.3s;">▼</span>
+        </div>
+
+        <div id="coupon-form" style="
+            display:none;
+            overflow:hidden;
+            transition:max-height 0.3s ease;
+            max-height:0;
+        ">
+            <div style="display:flex; gap:6px; margin-top:8px;">
+                <input type="text"
+                    id="coupon-input"
+                    placeholder="Coupon code"
+                    style="flex:1; padding:6px; border:1px solid #ccc;">
+                <button id="coupon-apply" style="
+                    padding:6px 12px;
+                    background:#333;
+                    color:#fff;
+                    border:none;
+                    cursor:pointer;
+                ">Apply</button>
+            </div>
+        </div>
+    `;
+
+            totalBox.parentNode.insertBefore(couponWrapper, totalBox);
+
+            // Toggle logic
+            const toggleBtn = document.getElementById("coupon-toggle");
+            const form = document.getElementById("coupon-form");
+            const arrow = document.getElementById("coupon-arrow");
+            const applyBtn = document.getElementById("coupon-apply");
+
+            toggleBtn.onclick = () => {
+                const isOpen = form.style.display === "block";
+
+                if (isOpen) {
+                    // CLOSE
+                    form.style.maxHeight = "0";
+                    setTimeout(() => (form.style.display = "none"), 200);
+                    arrow.textContent = "▼";
+                } else {
+                    // OPEN
+                    form.style.display = "block";
+                    setTimeout(() => (form.style.maxHeight = "80px"), 10);
+                    arrow.textContent = "▲";
+                }
+            };
+
+            applyBtn.onclick = () => {
+                alert("Under construction");
+            };
+        }
+
 
         // FIXED: always show currency
         totalBox.textContent = "Total: " +
