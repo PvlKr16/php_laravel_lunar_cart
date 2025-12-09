@@ -89,7 +89,12 @@
 
         if (!data.items || !data.items.length) {
             itemsBox.innerHTML = "<p>Cart is empty</p>";
-            totalBox.textContent = "Total: $0.00";
+            totalBox.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                    <span class="label">Subtotal:</span>
+                    <span class="line-total value" id="cart-total-value">0.00</span>
+                </div>
+            `;
             return;
         }
 
@@ -138,7 +143,15 @@
             itemsBox.appendChild(div);
         });
 
-        totalBox.textContent = "Total: " + formatWithCurrency(data.total?.formatted ?? data.total, currency);
+        totalBox.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                <span class="label">Subotal:</span>
+                <span class="line-total value" id="cart-total-value">
+                    ${formatWithCurrency(data.total?.formatted ?? data.total, currency)}
+                </span>
+            </div>
+            <div>Shipping & taxes may be re-calculated at checkout</div>
+            `;
     }
 
     /*
@@ -197,7 +210,7 @@
     */
     window.updateCartQty = async function (lineId, newQty) {
         const lineEl = document.getElementById("line-total-" + lineId);
-        const totalEl = totalBox;
+        const totalEl = document.getElementById("cart-total-value");
 
         if (!lineEl || !totalEl) return;
 
@@ -240,8 +253,10 @@
             }
 
             // getting correct totals from /cart in case server returns 0.00
-            const serverLine = (data.line_total !== undefined && data.line_total !== null) ? formatWithCurrency(data.line_total) : null;
-            const serverTotal = (data.total !== undefined && data.total !== null) ? ("Total: " + formatWithCurrency(data.total)) : null;
+            const serverLine = (data.line_total !== undefined && data.line_total !== null)
+                ? formatWithCurrency(data.line_total) : null;
+            const serverTotal = (data.total !== undefined && data.total !== null)
+                ? formatWithCurrency(data.total) : null;
 
             const newLineNum = numericValueFromFormatted(serverLine);
             const oldLineNum = numericValueFromFormatted(oldLineText);

@@ -11,7 +11,7 @@
     <div id="cart-footer">
         <div id="cart-total">Total: 0</div>
         <button style="width:100%; padding:12px; background:#333; color:#fff;">
-            Place Order
+            Checkout
         </button>
     </div>
 </div>
