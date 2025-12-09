@@ -154,7 +154,9 @@ class CartController extends Controller
         $line->save();
 
         // cart updating (Lunar recalculates totals and lines)
-        $cart = $cart->refresh();
+//        $cart = $cart->refresh();
+        $cart->calculate();
+        $cart->refresh();
 
         // updated line (after refresh)
         $updatedLine = $cart->lines()->find($lineId);

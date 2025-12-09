@@ -5,13 +5,48 @@
     const itemsBox = document.getElementById("cart-items");
     const totalBox = document.getElementById("cart-total");
 
-    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-    const csrf = csrfMeta ? csrfMeta.content : null;
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || null;
 
-    function debug(...args) {
-        console.debug("DEBUG:", ...args);
+    /*
+    / HELPERS
+    */
+    function detectCurrency(value, fallback = "$") {
+        if (!value) return fallback;
+        const s = String(value);
+        const m = s.match(/^[^\d]+/);
+        return m ? m[0] : fallback;
     }
 
+    function formatWithCurrency(value, fallbackCurrency = "$") {
+        if (value === null || value === undefined || value === "") return fallbackCurrency + "0.00";
+        // If value already contains currency symbol, return as-is
+        const s = String(value);
+        const cur = detectCurrency(s, fallbackCurrency);
+        if (s.startsWith(cur)) return s;
+        // Try numeric conversion
+        const n = parseFloat(String(value).replace(/[^\d\.\-]/g, ""));
+        if (!isNaN(n)) return cur + n.toFixed(2);
+        return cur + s;
+    }
+
+    function numericValueFromFormatted(str) {
+        if (str === null || str === undefined) return NaN;
+        const s = String(str).replace(/[^\d\.\-]/g, "");
+        return parseFloat(s);
+    }
+
+    function setLoading(el) {
+        if (!el) return;
+        el.classList.add("price-loading");
+    }
+    function unsetLoading(el) {
+        if (!el) return;
+        el.classList.remove("price-loading");
+    }
+
+    /*
+    / OPEN / CLOSE PANEL
+    */
     function setOpen(open) {
         if (open) {
             panel.classList.add("active");
@@ -23,47 +58,17 @@
         }
     }
 
-    function setLoadingPrice(el) {
-        if (!el) return;
-        el.classList.add("price-loading");
-    }
-    function unsetLoadingPrice(el) {
-        if (!el) return;
-        el.classList.remove("price-loading");
-    }
-
-
     window.openCart = () => setOpen(true);
     if (closeBtn) closeBtn.onclick = () => setOpen(false);
     if (overlay) overlay.onclick = () => setOpen(false);
 
     /*
-    / Currency helper
-    */
-    function detectCurrency(value, fallback = "$") {
-        if (!value) return fallback;
-
-        const m = value.match(/^[^\d]+/); // everything before first digit
-        return m ? m[0] : fallback;
-    }
-
-    function formatWithCurrency(value, fallbackCurrency = "$") {
-        if (!value) return fallbackCurrency + "0";
-
-        const cur = detectCurrency(value, fallbackCurrency);
-        return value.startsWith(cur) ? value : cur + value;
-    }
-
-    /*
     / LOAD CART
     */
     async function loadCart() {
-        debug("Loading cart...");
-
         try {
             const res = await fetch("/cart", { credentials: "same-origin" });
             const text = await res.text();
-
             let data;
             try {
                 data = JSON.parse(text);
@@ -71,184 +76,69 @@
                 console.error("Invalid JSON from /cart:", text);
                 return;
             }
-
             render(data);
         } catch (err) {
             console.error("loadCart error:", err);
         }
     }
-
     /*
-    / RENDER CART
+    / RENDER
     */
     function render(data) {
         itemsBox.innerHTML = "";
 
         if (!data.items || !data.items.length) {
             itemsBox.innerHTML = "<p>Cart is empty</p>";
-            totalBox.textContent = "Total: 0";
+            totalBox.textContent = "Total: $0.00";
             return;
         }
 
-        const currency = detectCurrency(
-            data.total?.formatted ?? data.total,
-            "$"
-        );
+        const currency = detectCurrency(data.total?.formatted ?? data.total, "$");
 
         data.items.forEach((item) => {
-            const lid = item.id;
-
-            const lineCurrency = detectCurrency(item.line_total, currency);
-
+            const lineId = item.id;
             const div = document.createElement("div");
             div.className = "cart-item";
 
             div.innerHTML = `
-    <div style="display:flex; align-items:flex-start; gap:12px; width:100%; position:relative;">
+                <div style="display:flex; gap:12px; width:100%; align-items:flex-start; position:relative;">
 
-        <!-- Блок изображения -->
-        <div style="
-            width:30px;
-            height:50px;
-            border:1px solid #ccc;
-            position:relative;
-            flex-shrink:0;
-            overflow:visible;
-        ">
-            <!-- Кнопка удаления на рамке -->
-            <button
-                data-action="remove"
-                data-id="${lid}"
-                title="Remove"
-                style="
-                    position:absolute;
-                    top:-8px;
-                    left:-8px;
-                    width:20px;
-                    height:20px;
-                    border:none;
-                    background:#f44336;
-                    color:#fff;
-                    font-size:10px;
-                    border-radius:50%;
-                    cursor:pointer;
-                    z-index:10;
-                "
-            >✕</button>
+                    <div style="width:40px;height:60px;border:1px solid #ccc;position:relative;flex-shrink:0;">
+                        <button data-action="remove" data-id="${lineId}" title="Remove"
+                            style="position:absolute;top:-8px;left:-8px;width:18px;height:18px;border:none;background:#f44336;color:#fff;font-size:10px;border-radius:50%;cursor:pointer;z-index:10;">✕</button>
+                        <img src="${item.product?.thumbnail ?? '/images/no-image.png'}" style="width:100%;height:100%;object-fit:cover;">
+                    </div>
 
-            <img
-                src="${item.product?.thumbnail ?? '/images/no-image.png'}"
-                style="width:100%; height:100%; object-fit:cover;"
-            >
-        </div>
+                    <div style="flex-grow:1;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div class="title">${item.product?.name ?? "Product"}</div>
+                            <div class="line-total" id="line-total-${lineId}">
+                                ${formatWithCurrency(item.line_total, currency)}
+                            </div>
+                        </div>
 
-        <div style="flex-grow:1;">
-            <div style="display:flex; justify-content:space-between;">
-                <div class="title">${item.product?.name ?? "Product"}</div>
-                <div class="line-total" id="line-total-${lid}">
-                    ${formatWithCurrency(item.line_total, detectCurrency(data.total))}
+                        <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
+                            <button data-action="decrease" data-id="${lineId}" style="width:22px;height:22px;background:#ddd;border:none;cursor:pointer;">−</button>
+
+                            <input type="number"
+                                id="qty-input-${lineId}"
+                                value="${item.quantity ?? 1}"
+                                min="1"
+                                class="qty-input"
+                                data-line-id="${lineId}"
+                                style="width:45px;text-align:center;">
+
+                            <button data-action="increase" data-id="${lineId}" style="width:22px;height:22px;background:#ddd;border:none;cursor:pointer;">+</button>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
-
-            <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
-                <button data-action="decrease" data-id="${lid}" style="width:22px; height:22px; background:#ddd; border:none; cursor:pointer;">−</button>
-
-                <input type="number"
-                    id="qty-input-${lid}"
-                    value="${item.quantity ?? 1}"
-                    min="1"
-                    class="qty-input"
-                    data-line-id="${lid}"
-                    style="width:45px; text-align:center;"
-                >
-
-                <button data-action="increase" data-id="${lid}" style="width:22px; height:22px; background:#ddd; border:none; cursor:pointer;">+</button>
-            </div>
-        </div>
-    </div>
-`;
-
+            `;
 
             itemsBox.appendChild(div);
         });
 
-        /*
-        / COUPON TOGGLE BLOCK (only once)
-        */
-        let couponWrapper = document.getElementById("coupon-wrapper");
-        if (!couponWrapper) {
-            couponWrapper = document.createElement("div");
-            couponWrapper.id = "coupon-wrapper";
-            couponWrapper.style.marginBottom = "12px";
-            couponWrapper.style.cursor = "pointer";
-
-            couponWrapper.innerHTML = `
-        <div id="coupon-toggle" style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:8px 0;
-            user-select:none;
-        ">
-            <span>Got a discount code?</span>
-            <span id="coupon-arrow" style="transition:0.3s;">▼</span>
-        </div>
-
-        <div id="coupon-form" style="
-            display:none;
-            overflow:hidden;
-            transition:max-height 0.3s ease;
-            max-height:0;
-        ">
-            <div style="display:flex; gap:6px; margin-top:8px;">
-                <input type="text"
-                    id="coupon-input"
-                    placeholder="Coupon code"
-                    style="flex:1; padding:6px; border:1px solid #ccc;">
-                <button id="coupon-apply" style="
-                    padding:6px 12px;
-                    background:#333;
-                    color:#fff;
-                    border:none;
-                    cursor:pointer;
-                ">Apply</button>
-            </div>
-        </div>
-    `;
-
-            totalBox.parentNode.insertBefore(couponWrapper, totalBox);
-
-            // Toggle logic
-            const toggleBtn = document.getElementById("coupon-toggle");
-            const form = document.getElementById("coupon-form");
-            const arrow = document.getElementById("coupon-arrow");
-            const applyBtn = document.getElementById("coupon-apply");
-
-            toggleBtn.onclick = () => {
-                const isOpen = form.style.display === "block";
-
-                if (isOpen) {
-                    // CLOSE
-                    form.style.maxHeight = "0";
-                    setTimeout(() => (form.style.display = "none"), 200);
-                    arrow.textContent = "▼";
-                } else {
-                    // OPEN
-                    form.style.display = "block";
-                    setTimeout(() => (form.style.maxHeight = "80px"), 10);
-                    arrow.textContent = "▲";
-                }
-            };
-
-            applyBtn.onclick = () => {
-                alert("Under construction");
-            };
-        }
-
-
-        // FIXED: always show currency
-        totalBox.textContent = "Total: " +
-            formatWithCurrency(data.total?.formatted ?? data.total, currency);
+        totalBox.textContent = "Total: " + formatWithCurrency(data.total?.formatted ?? data.total, currency);
     }
 
     /*
@@ -258,10 +148,8 @@
         const qtyInput = document.getElementById("qty-" + variantId);
         const msg = document.getElementById("msg-" + variantId);
 
-        if (!qtyInput) return;
-
-        const qty = parseInt(qtyInput.value) || 1;
-        msg && (msg.textContent = "");
+        const qty = qtyInput ? (parseInt(qtyInput.value, 10) || 1) : 1;
+        if (msg) msg.textContent = "";
 
         try {
             const res = await fetch("/cart/add", {
@@ -277,10 +165,14 @@
                 }),
             });
 
-            const data = await res.json().catch(() => null);
+            const text = await res.text();
+            let data;
+            try { data = JSON.parse(text); } catch (e) { data = null; }
 
             if (!res.ok) {
-                msg.textContent = data?.error ?? "Error";
+                const err = data?.error ?? "Error adding to cart";
+                if (msg) msg.textContent = err;
+                console.error("addToCart error:", data || text);
                 return;
             }
 
@@ -288,9 +180,15 @@
                 updateStockOnPage(variantId, data.new_stock);
             }
 
+            // open cart to show added item
             openCart();
+
+            // load full cart to get correct totals (server's /cart returns correct totals)
+            await loadCart();
+
         } catch (err) {
-            console.error(err);
+            console.error("addToCartWithQty error:", err);
+            if (msg) msg.textContent = "Error";
         }
     };
 
@@ -298,10 +196,17 @@
     / UPDATE CART QTY
     */
     window.updateCartQty = async function (lineId, newQty) {
-
         const lineEl = document.getElementById("line-total-" + lineId);
-        setLoadingPrice(lineEl);
-        setLoadingPrice(totalBox);
+        const totalEl = totalBox;
+
+        if (!lineEl || !totalEl) return;
+
+        const oldLineText = lineEl.textContent;
+        const oldTotalText = totalEl.textContent;
+
+        // show loading mask but keep old text hidden via CSS
+        setLoading(lineEl);
+        setLoading(totalEl);
 
         try {
             const res = await fetch("/cart/update", {
@@ -311,41 +216,84 @@
                     "X-CSRF-TOKEN": csrf,
                 },
                 credentials: "same-origin",
-                body: JSON.stringify({
-                    line_id: lineId,
-                    quantity: newQty,
-                }),
+                body: JSON.stringify({ line_id: lineId, quantity: newQty }),
             });
 
-            const data = await res.json().catch(() => null);
+            const raw = await res.text();
+            console.log("Raw server response for updateCartQty:", raw);
 
-            unsetLoadingPrice(document.getElementById("line-total-" + lineId));
-            unsetLoadingPrice(totalBox);
-
-            if (!res.ok) return;
-
-            // Update line total
-            if (data.line_total !== undefined) {
-                document.getElementById("line-total-" + lineId).textContent =
-                    formatWithCurrency(data.line_total);
+            let data;
+            try {
+                data = JSON.parse(raw);
+            } catch (err) {
+                console.error("updateCartQty: invalid JSON:", raw);
+                unsetLoading(lineEl);
+                unsetLoading(totalEl);
+                return;
             }
 
-            if (data.total !== undefined) {
-                totalBox.textContent = "Total: " + formatWithCurrency(data.total);
+            if (!res.ok || data?.error) {
+                console.error("updateCartQty server error:", data?.error || data);
+                unsetLoading(lineEl);
+                unsetLoading(totalEl);
+                return;
             }
 
-            // Update stock
+            // getting correct totals from /cart in case server returns 0.00
+            const serverLine = (data.line_total !== undefined && data.line_total !== null) ? formatWithCurrency(data.line_total) : null;
+            const serverTotal = (data.total !== undefined && data.total !== null) ? ("Total: " + formatWithCurrency(data.total)) : null;
+
+            const newLineNum = numericValueFromFormatted(serverLine);
+            const oldLineNum = numericValueFromFormatted(oldLineText);
+            const newTotalNum = numericValueFromFormatted(serverTotal);
+            const oldTotalNum = numericValueFromFormatted(oldTotalText);
+
+            // if server returns 0.00
+            if (serverLine !== null) {
+                if (!(Number.isFinite(newLineNum) && newLineNum === 0 && Number.isFinite(oldLineNum) && oldLineNum !== 0)) {
+                    // first price-loading then new value
+                    lineEl.textContent = serverLine;
+                } else {
+                    // 0.00 is ignored
+                    console.debug("[updateCartQty] ignored server line_total=0.00");
+                }
+            }
+
+            if (serverTotal !== null) {
+                if (!(Number.isFinite(newTotalNum) && newTotalNum === 0 && Number.isFinite(oldTotalNum) && oldTotalNum !== 0)) {
+                    totalEl.textContent = serverTotal;
+                } else {
+                    console.debug("[updateCartQty] ignored server total=0.00");
+                }
+            }
+
+            // Update stock if provided
             if (data.variant_id && data.new_stock !== undefined) {
                 updateStockOnPage(data.variant_id, data.new_stock);
             }
 
+            // If server returns zeros (transient), re-fetch full cart to get correct totals
+            if ((serverLine !== null && Number.isFinite(newLineNum) && newLineNum === 0 && Number.isFinite(oldLineNum) && oldLineNum !== 0) ||
+                (serverTotal !== null && Number.isFinite(newTotalNum) && newTotalNum === 0 && Number.isFinite(oldTotalNum) && oldTotalNum !== 0)) {
+                // fetch full cart once to get consistent totals (debounced by awaiting here)
+                await loadCart();
+            }
+
+            unsetLoading(lineEl);
+            unsetLoading(totalEl);
+            return data;
         } catch (err) {
-            console.error("updateCartQty error", err);
+            console.error("updateCartQty error:", err);
+            // restore
+            lineEl.textContent = oldLineText;
+            totalEl.textContent = oldTotalText;
+            unsetLoading(lineEl);
+            unsetLoading(totalEl);
         }
     };
 
     /*
-    / REMOVE FROM CART
+    REMOVE FROM CART
     */
     window.removeFromCart = async function (lineId) {
         try {
@@ -359,20 +307,23 @@
                 body: JSON.stringify({ line_id: lineId }),
             });
 
-            const data = await res.json().catch(() => null);
+            const text = await res.text();
+            let data;
+            try { data = JSON.parse(text); } catch { data = null; }
 
             if (data?.variant_id && data?.new_stock !== undefined) {
                 updateStockOnPage(data.variant_id, data.new_stock);
             }
 
-            loadCart();
+            // reload full cart to reflect removed line & totals
+            await loadCart();
         } catch (err) {
-            console.error(err);
+            console.error("removeFromCart error:", err);
         }
     };
 
     /*
-    / UPDATE STOCK IN DOM
+    / UPDATE STOCK ON PAGE
     */
     window.updateStockOnPage = function (variantId, newStock) {
         const stockDiv = document.getElementById("stock-" + variantId);
@@ -383,7 +334,7 @@
 
         if (qtyInput) {
             qtyInput.max = newStock;
-            if (qtyInput.value > newStock) qtyInput.value = newStock;
+            if (parseInt(qtyInput.value, 10) > newStock) qtyInput.value = newStock;
         }
 
         if (btn) {
@@ -398,7 +349,7 @@
     };
 
     /*
-    / BUTTON HANDLERS
+    / EVENT LISTENERS
     */
     itemsBox.addEventListener("click", async function (e) {
         const btn = e.target.closest("[data-action]");
@@ -414,7 +365,7 @@
         const input = document.getElementById("qty-input-" + id);
         if (!input) return;
 
-        let qty = parseInt(input.value);
+        let qty = parseInt(input.value, 10);
 
         if (action === "increase") qty++;
         else if (action === "decrease") {
@@ -424,31 +375,23 @@
 
         input.value = qty;
         await updateCartQty(id, qty);
-        return loadCart();
     });
-
 
     itemsBox.addEventListener("change", async function (e) {
-        if (e.target.classList.contains('qty-input')) {
-            const id = e.target.dataset.lineId;
-            let val = parseInt(e.target.value || 0);
+        if (!e.target.classList.contains('qty-input')) return;
 
-            if (val < 1) {
-                await removeFromCart(id);
-                return;
-            }
+        const id = e.target.dataset.lineId;
+        let val = parseInt(e.target.value || 0, 10);
 
-            if (val === 1) {
-                e.target.value = 1;
-                const result = await updateCartQty(id, 1);
-                loadCart();
-                return;
-            }
+        if (val < 1) return removeFromCart(id);
 
-            const result = await updateCartQty(id, val);
-            loadCart();
-        }
+        e.target.value = val;
+        await updateCartQty(id, val);
     });
 
-    if (panel.classList.contains("active")) loadCart();
+    /*
+    / Init
+    */
+    if (panel && panel.classList.contains("active")) loadCart();
+
 })();
