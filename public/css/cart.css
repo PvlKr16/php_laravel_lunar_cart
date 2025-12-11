@@ -1,3 +1,6 @@
+/* ─────────────────────────────────────────────
+   CART OVERLAY & PANEL
+────────────────────────────────────────────── */
 #cart-overlay {
     position: fixed;
     inset: 0;
@@ -153,6 +156,9 @@
     font-size: 15px;
 }
 
+/* ─────────────────────────────────────────────
+   FLOATING CART BUTTON (нижняя кнопка)
+────────────────────────────────────────────── */
 .fkcart-toggler {
     position: fixed;
     right: 24px;
@@ -168,6 +174,7 @@
     justify-content: center;
     box-shadow: 0 4px 14px rgba(0,0,0,0.25);
 }
+
 .fkcart-toggler:hover {
     background: #222;
 }
@@ -178,13 +185,25 @@
 
 .fkcart-item-count {
     position: absolute;
-    top: -6px;
-    right: -6px;
+
+    min-width: 18px;
+    height: 18px;
+    padding: 0 6px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     background: #e53935;
     color: #fff;
-    padding: 2px 7px;
-    font-size: 12px;
-    border-radius: 50%;
+    font-size: 11px;
+    border-radius: 50px;
+    line-height: 1;
+
+    pointer-events: none;
+    box-sizing: border-box;
+
+    font-weight: bold;
 }
 
 #fkcart-mini-toggler .fkcart-shortcode-icon-wrap {
@@ -194,24 +213,11 @@
 }
 
 #fkcart-mini-toggler .fkcart-item-count {
-    position: absolute;
     top: -6px;
     right: -10px;
+}
 
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #ff4a4a;
-    color: #fff;
-    font-size: 11px;
-    border-radius: 50px;
-    line-height: 1;
-
-    pointer-events: none;
-    box-sizing: border-box;
+#fkit-floating-count {
+    top: -6px;
+    right: -6px;
 }
