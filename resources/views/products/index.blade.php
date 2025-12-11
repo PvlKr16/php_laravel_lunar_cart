@@ -18,5 +18,4 @@
         </div>
         <div class="fkcart-item-count" id="fkit-floating-count" data-item-count="0">0</div>
     </div>
-
 @endsection

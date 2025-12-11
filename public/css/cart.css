@@ -186,3 +186,32 @@
     font-size: 12px;
     border-radius: 50%;
 }
+
+#fkcart-mini-toggler .fkcart-shortcode-icon-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+#fkcart-mini-toggler .fkcart-item-count {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ff4a4a;
+    color: #fff;
+    font-size: 11px;
+    border-radius: 50px;
+    line-height: 1;
+
+    pointer-events: none;
+    box-sizing: border-box;
+}

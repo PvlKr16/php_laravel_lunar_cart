@@ -55,14 +55,14 @@
             overlay.classList.add("active");
             loadCart();
 
-            // скрываем плавающую кнопку
+            // button hides
             if (floatingBtn) floatingBtn.style.display = "none";
 
         } else {
             panel.classList.remove("active");
             overlay.classList.remove("active");
 
-            // возвращаем кнопку
+            // button appears
             if (floatingBtn) floatingBtn.style.display = "flex";
         }
     }
@@ -422,13 +422,23 @@
     / FLOATING CART BUTTON
     */
     document.addEventListener("DOMContentLoaded", () => {
-        const btn = document.getElementById("fkcart-floating-toggler");
-        const countEl = document.getElementById("fkit-floating-count");
 
+        const miniBtn = document.getElementById("fkcart-mini-toggler");
+        const btn = document.getElementById("fkcart-floating-toggler");
+
+        const countEl = document.getElementById("fkit-floating-count"); // нижний
+        const miniCountEl = document.querySelector("#fkcart-mini-toggler .fkcart-item-count"); // верхний
+
+        // открытие корзины
         if (btn) btn.addEventListener("click", () => {
             if (window.openCart) openCart();
         });
 
+        if (miniBtn) miniBtn.addEventListener("click", () => {
+            if (window.openCart) openCart();
+        });
+
+        // обновление общее — теперь работает на две кнопки
         async function refreshFloatingCount() {
             try {
                 const res = await fetch("/cart", { credentials: "same-origin" });
@@ -437,10 +447,18 @@
 
                 const qty = data?.items?.reduce((s, i) => s + (i.quantity ?? 0), 0) || 0;
 
+                // нижняя кнопка
                 if (countEl) {
                     countEl.textContent = qty;
                     countEl.dataset.itemCount = qty;
                 }
+
+                // верхняя кнопка
+                if (miniCountEl) {
+                    miniCountEl.textContent = qty;
+                    miniCountEl.dataset.itemCount = qty;
+                }
+
             } catch (e) {
                 console.error("Floating cart counter error:", e);
             }
@@ -471,12 +489,12 @@
             return result;
         };
 
-        // Also update counter when cart loads
         const oldOpenCart = window.openCart;
         window.openCart = function () {
             oldOpenCart();
             setTimeout(refreshFloatingCount, 300);
         };
+
     });
 
 
