@@ -47,13 +47,13 @@
     /*
     / OPEN / CLOSE PANEL
     */
-    function setOpen(open) {
+    async function setOpen(open) {
         const floatingBtn = document.getElementById("fkcart-floating-toggler");
 
         if (open) {
             panel.classList.add("active");
             overlay.classList.add("active");
-            loadCart();
+            await loadCart();
 
             // button hides
             if (floatingBtn) floatingBtn.style.display = "none";
@@ -438,7 +438,6 @@
             if (window.openCart) openCart();
         });
 
-        // обновление общее — теперь работает на две кнопки
         async function refreshFloatingCount() {
             try {
                 const res = await fetch("/cart", { credentials: "same-origin" });
@@ -447,13 +446,11 @@
 
                 const qty = data?.items?.reduce((s, i) => s + (i.quantity ?? 0), 0) || 0;
 
-                // нижняя кнопка
                 if (countEl) {
                     countEl.textContent = qty;
                     countEl.dataset.itemCount = qty;
                 }
 
-                // верхняя кнопка
                 if (miniCountEl) {
                     miniCountEl.textContent = qty;
                     miniCountEl.dataset.itemCount = qty;
@@ -490,9 +487,9 @@
         };
 
         const oldOpenCart = window.openCart;
-        window.openCart = function () {
-            oldOpenCart();
-            setTimeout(refreshFloatingCount, 300);
+        window.openCart = async function () {
+            await oldOpenCart();
+            await refreshFloatingCount();
         };
 
     });
