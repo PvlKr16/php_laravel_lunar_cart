@@ -90,7 +90,7 @@
         if (!data.items || !data.items.length) {
             itemsBox.innerHTML = "<p>Cart is empty</p>";
             totalBox.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                <div class="cart-total-row">
                     <span class="label">Subtotal:</span>
                     <span class="line-total value" id="cart-total-value">0.00</span>
                 </div>
@@ -106,34 +106,33 @@
             div.className = "cart-item";
 
             div.innerHTML = `
-                <div style="display:flex; gap:12px; width:100%; align-items:flex-start; position:relative;">
+                <div class="cart-item-inner">
 
-                    <div style="width:40px;height:60px;border:1px solid #ccc;position:relative;flex-shrink:0;">
+                    <div class="cart-thumb">
                         <button data-action="remove" data-id="${lineId}" title="Remove"
-                            style="position:absolute;top:-8px;left:-8px;width:18px;height:18px;border:none;background:#f44336;color:#fff;font-size:10px;border-radius:50%;cursor:pointer;z-index:10;">✕</button>
-                        <img src="${item.product?.thumbnail ?? '/images/no-image.png'}" style="width:100%;height:100%;object-fit:cover;">
+                            class="cart-remove-btn">✕</button>
+                        <img src="${item.product?.thumbnail ?? '/images/no-image.png'}">
                     </div>
 
                     <div style="flex-grow:1;">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <div class="title">${item.product?.name ?? "Product"}</div>
+                        <div class="cart-item-header">
+                            <div class="cart-title">${item.product?.name ?? "Product"}</div>
                             <div class="line-total" id="line-total-${lineId}">
                                 ${formatWithCurrency(item.line_total, currency)}
                             </div>
                         </div>
 
-                        <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
-                            <button data-action="decrease" data-id="${lineId}" style="width:22px;height:22px;background:#ddd;border:none;cursor:pointer;">−</button>
+                        <div class="cart-qty-row">
+                            <button data-action="decrease" data-id="${lineId}" class="cart-qty-btn">−</button>
 
                             <input type="number"
                                 id="qty-input-${lineId}"
                                 value="${item.quantity ?? 1}"
                                 min="1"
                                 class="qty-input"
-                                data-line-id="${lineId}"
-                                style="width:45px;text-align:center;">
+                                data-line-id="${lineId}">
 
-                            <button data-action="increase" data-id="${lineId}" style="width:22px;height:22px;background:#ddd;border:none;cursor:pointer;">+</button>
+                            <button data-action="increase" data-id="${lineId}" class="cart-qty-btn">+</button>
                         </div>
                     </div>
 
@@ -144,14 +143,15 @@
         });
 
         totalBox.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <div class="cart-total-row">
                 <span class="label">Subotal:</span>
                 <span class="line-total value" id="cart-total-value">
                     ${formatWithCurrency(data.total?.formatted ?? data.total, currency)}
                 </span>
             </div>
-            <div>Shipping & taxes may be re-calculated at checkout</div>
-            `;
+
+            <div class="cart-footer-msg">Shipping & taxes may be re-calculated at checkout</div>
+        `;
     }
 
     /*

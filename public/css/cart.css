@@ -1,3 +1,5 @@
+/* ===== Общие стили уже существовали ===== */
+
 #cart-overlay {
     position: fixed;
     inset: 0;
@@ -30,7 +32,6 @@
     right: 0;
 }
 
-/* Adaptivity for mobiles */
 @media (max-width: 480px) {
     #cart-panel {
         width: 100%;
@@ -78,4 +79,78 @@
     color: transparent !important;
     border-radius: 4px;
     transition: background 0.2s;
+}
+
+.cart-item-inner {
+    display:flex;
+    gap:12px;
+    width:100%;
+    align-items:flex-start;
+    position:relative;
+}
+
+.cart-thumb {
+    width:40px;
+    height:60px;
+    border:1px solid #ccc;
+    position:relative;
+    flex-shrink:0;
+}
+
+.cart-remove-btn {
+    position:absolute;
+    top:-8px;
+    left:-8px;
+    width:18px;
+    height:18px;
+    border:none;
+    background:#f44336;
+    color:#fff;
+    font-size:10px;
+    border-radius:50%;
+    cursor:pointer;
+    z-index:10;
+}
+
+.cart-item-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+}
+
+.cart-qty-row {
+    margin-top:4px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.cart-qty-btn {
+    width:22px;
+    height:22px;
+    background:#ddd;
+    border:none;
+    cursor:pointer;
+}
+
+.qty-input {
+    width:45px;
+    text-align:center;
+}
+
+.cart-total-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+}
+
+.cart-footer-msg {
+    font-size: 13px;
+    opacity: .8;
+}
+
+.cart-title {
+    font-weight: 500;
+    font-size: 15px;
 }
