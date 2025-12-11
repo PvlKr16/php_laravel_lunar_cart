@@ -48,13 +48,22 @@
     / OPEN / CLOSE PANEL
     */
     function setOpen(open) {
+        const floatingBtn = document.getElementById("fkcart-floating-toggler");
+
         if (open) {
             panel.classList.add("active");
             overlay.classList.add("active");
             loadCart();
+
+            // скрываем плавающую кнопку
+            if (floatingBtn) floatingBtn.style.display = "none";
+
         } else {
             panel.classList.remove("active");
             overlay.classList.remove("active");
+
+            // возвращаем кнопку
+            if (floatingBtn) floatingBtn.style.display = "flex";
         }
     }
 
@@ -408,5 +417,67 @@
     / Init
     */
     if (panel && panel.classList.contains("active")) loadCart();
+
+    /*
+    / FLOATING CART BUTTON
+    */
+    document.addEventListener("DOMContentLoaded", () => {
+        const btn = document.getElementById("fkcart-floating-toggler");
+        const countEl = document.getElementById("fkit-floating-count");
+
+        if (btn) btn.addEventListener("click", () => {
+            if (window.openCart) openCart();
+        });
+
+        async function refreshFloatingCount() {
+            try {
+                const res = await fetch("/cart", { credentials: "same-origin" });
+                const text = await res.text();
+                const data = JSON.parse(text);
+
+                const qty = data?.items?.reduce((s, i) => s + (i.quantity ?? 0), 0) || 0;
+
+                if (countEl) {
+                    countEl.textContent = qty;
+                    countEl.dataset.itemCount = qty;
+                }
+            } catch (e) {
+                console.error("Floating cart counter error:", e);
+            }
+        }
+
+        // Initial load
+        refreshFloatingCount();
+
+        /*
+        / HOOK INTO CART ACTIONS TO KEEP COUNTER UPDATED
+        */
+        const oldAdd = window.addToCartWithQty;
+        window.addToCartWithQty = async function (...args) {
+            await oldAdd(...args);
+            refreshFloatingCount();
+        };
+
+        const oldRemove = window.removeFromCart;
+        window.removeFromCart = async function (...args) {
+            await oldRemove(...args);
+            refreshFloatingCount();
+        };
+
+        const oldUpdate = window.updateCartQty;
+        window.updateCartQty = async function (...args) {
+            const result = await oldUpdate(...args);
+            refreshFloatingCount();
+            return result;
+        };
+
+        // Also update counter when cart loads
+        const oldOpenCart = window.openCart;
+        window.openCart = function () {
+            oldOpenCart();
+            setTimeout(refreshFloatingCount, 300);
+        };
+    });
+
 
 })();
