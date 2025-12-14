@@ -51,12 +51,12 @@
         const floatingBtn = document.getElementById("fkcart-floating-toggler");
 
         if (open) {
+            // button hides
+            if (floatingBtn) floatingBtn.style.display = "none";
+
             panel.classList.add("active");
             overlay.classList.add("active");
             await loadCart();
-
-            // button hides
-            if (floatingBtn) floatingBtn.style.display = "none";
 
         } else {
             panel.classList.remove("active");
@@ -97,15 +97,49 @@
         itemsBox.innerHTML = "";
 
         if (!data.items || !data.items.length) {
-            itemsBox.innerHTML = "<p>Cart is empty</p>";
-            totalBox.innerHTML = `
-                <div class="cart-total-row">
-                    <span class="label">Subtotal:</span>
-                    <span class="line-total value" id="cart-total-value">0.00</span>
+
+            itemsBox.innerHTML = `
+                <div class="cart-empty">
+
+                    <div class="cart-empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 2.71411C2 2.31972 2.31972 2 2.71411 2H3.34019C4.37842 2 4.97454 2.67566 5.31984 3.34917C5.55645 3.8107 5.72685 4.37375 5.86764 4.86133H20.5709C21.5186 4.86133 22.2035 5.7674 21.945 6.67914L19.809 14.2123C19.4606 15.4413 18.3384 16.2896 17.0609 16.2896H9.80665C8.51866 16.2896 7.39 15.4276 7.05095 14.185L6.13344 10.8225C6.12779 10.8073 6.12262 10.7917 6.11795 10.7758L4.64782 5.78023C4.59738 5.61449 4.55096 5.45386 4.50614 5.29878C4.36354 4.80529 4.23716 4.36794 4.04891 4.00075C3.82131 3.55681 3.61232 3.42822 3.34019 3.42822H2.71411C2.31972 3.42822 2 3.1085 2 2.71411ZM7.49529 10.3874L8.4288 13.8091C8.59832 14.4304 9.16266 14.8613 9.80665 14.8613H17.0609C17.6997 14.8613 18.2608 14.4372 18.435 13.8227L20.5709 6.28955H6.28975L7.49529 10.3874ZM12.0017 19.8577C12.0017 21.0408 11.0426 22 9.85941 22C8.67623 22 7.71708 21.0408 7.71708 19.8577C7.71708 18.6745 8.67623 17.7153 9.85941 17.7153C11.0426 17.7153 12.0017 18.6745 12.0017 19.8577ZM10.5735 19.8577C10.5735 19.4633 10.2538 19.1436 9.85941 19.1436C9.46502 19.1436 9.1453 19.4633 9.1453 19.8577C9.1453 20.2521 9.46502 20.5718 9.85941 20.5718C10.2538 20.5718 10.5735 20.2521 10.5735 19.8577ZM19.1429 19.8577C19.1429 21.0408 18.1837 22 17.0005 22C15.8173 22 14.8582 21.0408 14.8582 19.8577C14.8582 18.6745 15.8173 17.7153 17.0005 17.7153C18.1837 17.7153 19.1429 18.6745 19.1429 19.8577ZM17.7146 19.8577C17.7146 19.4633 17.3949 19.1436 17.0005 19.1436C16.6061 19.1436 16.2864 19.4633 16.2864 19.8577C16.2864 20.2521 16.6061 20.5718 17.0005 20.5718C17.3949 20.5718 17.7146 20.2521 17.7146 19.8577Z"
+                                  fill="currentColor"/>
+                        </svg>
+                    </div>
+
+                    <div class="cart-empty-title">Your Cart is Empty</div>
+
+                    <div class="cart-empty-subtitle">
+                        Fill your cart with amazing items
+                    </div>
+
+                    <button class="cart-empty-btn" id="cart-shop-now">
+                        Shop Now
+                    </button>
+
                 </div>
             `;
+
+
+            totalBox.innerHTML = "";
+
+            // hide checkout button
+            const checkoutBtn = document.getElementById("fkcart-checkout-button");
+            if (checkoutBtn) checkoutBtn.style.display = "none";
+
+            // close cart on button click
+            const shopNowBtn = document.getElementById("cart-shop-now");
+            if (shopNowBtn) {
+                shopNowBtn.onclick = () => {
+                    if (window.openCart) setOpen(false);
+                };
+            }
+
             return;
         }
+
 
         const currency = detectCurrency(data.total?.formatted ?? data.total, "$");
 
@@ -119,8 +153,15 @@
 
                     <div class="cart-thumb">
                         <button data-action="remove" data-id="${lineId}" title="Remove"
-                            class="cart-remove-btn">✕</button>
-                        <img src="${item.product?.thumbnail ?? '/images/no-image.png'}">
+                            class="cart-remove-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24"
+                                 class="fkcart-icon-close"
+                                 fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4.1518 4.31359L4.22676 4.22676C4.50161 3.9519 4.93172 3.92691 5.2348 4.1518L5.32163 4.22676L12 10.9048L18.6784 4.22676C18.9807 3.92441 19.4709 3.92441 19.7732 4.22676C20.0756 4.5291 20.0756 5.01929 19.7732 5.32163L13.0952 12L19.7732 18.6784C20.0481 18.9532 20.0731 19.3833 19.8482 19.6864L19.7732 19.7732C19.4984 20.0481 19.0683 20.0731 18.7652 19.8482L18.6784 19.7732L12 13.0952L5.32163 19.7732C5.01929 20.0756 4.5291 20.0756 4.22676 19.7732C3.92441 19.4709 3.92441 18.9807 4.22676 18.6784L10.9048 12L4.22676 5.32163C3.9519 5.04678 3.92691 4.61667 4.1518 4.31359L4.22676 4.22676L4.1518 4.31359Z"
+                                      fill="currentColor"/>
+                            </svg>
+                        </button>
                     </div>
 
                     <div style="flex-grow:1;">
@@ -154,13 +195,15 @@
         totalBox.innerHTML = `
             <div class="cart-total-row">
                 <span class="label">Subotal:</span>
-                <span class="line-total value" id="cart-total-value">
+                <span class="line-total_value" id="cart-total-value">
                     ${formatWithCurrency(data.total?.formatted ?? data.total, currency)}
                 </span>
             </div>
 
             <div class="cart-footer-msg">Shipping & taxes may be re-calculated at checkout</div>
         `;
+        const checkoutBtn = document.getElementById("fkcart-checkout-button");
+        if (checkoutBtn) checkoutBtn.style.display = "flex";
     }
 
     /*
