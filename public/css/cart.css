@@ -37,6 +37,27 @@
     font-family: 'Montserrat', sans-serif;
 }
 
+#cart-panel.empty {
+    display: flex;
+    flex-direction: column;
+}
+
+#cart-panel.empty #cart-items {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.cart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
 @media (max-width: 480px) {
     #cart-panel {
         width: 100%;
