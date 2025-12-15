@@ -96,30 +96,45 @@
     function render(data) {
         itemsBox.innerHTML = "";
 
+        /* CART TITLE COUNT */
+        const titleCountEl = document.getElementById("cart-title-count");
+        const count =
+            data?.items?.reduce((sum, i) => sum + (i.quantity ?? 0), 0) || 0;
+
+        if (titleCountEl) {
+            if (count > 0) {
+                titleCountEl.textContent = `(${count})`;
+                titleCountEl.style.display = "inline";
+            } else {
+                titleCountEl.textContent = "";
+                titleCountEl.style.display = "none";
+            }
+        }
+
         if (!data.items || !data.items.length) {
 
             // EMPTY STATE CONTENT
             itemsBox.innerHTML = `
-        <div class="cart-empty">
+                <div class="cart-empty">
 
-            <div class="cart-empty-icon">
-                <svg viewBox="0 0 24 24" fill="none"
-                     xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 2.71411C2 2.31972 2.31972 2 2.71411 2H3.34019C4.37842 2 4.97454 2.67566 5.31984 3.34917C5.55645 3.8107 5.72685 4.37375 5.86764 4.86133H20.5709C21.5186 4.86133 22.2035 5.7674 21.945 6.67914L19.809 14.2123C19.4606 15.4413 18.3384 16.2896 17.0609 16.2896H9.80665C8.51866 16.2896 7.39 15.4276 7.05095 14.185L6.13344 10.8225C6.12779 10.8073 6.12262 10.7917 6.11795 10.7758L4.64782 5.78023C4.59738 5.61449 4.55096 5.45386 4.50614 5.29878C4.36354 4.80529 4.23716 4.36794 4.04891 4.00075C3.82131 3.55681 3.61232 3.42822 3.34019 3.42822H2.71411C2.31972 3.42822 2 3.1085 2 2.71411Z"
-                          fill="currentColor"/>
-                </svg>
-            </div>
+                    <div class="cart-empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 2.71411C2 2.31972 2.31972 2 2.71411 2H3.34019C4.37842 2 4.97454 2.67566 5.31984 3.34917C5.55645 3.8107 5.72685 4.37375 5.86764 4.86133H20.5709C21.5186 4.86133 22.2035 5.7674 21.945 6.67914L19.809 14.2123C19.4606 15.4413 18.3384 16.2896 17.0609 16.2896H9.80665C8.51866 16.2896 7.39 15.4276 7.05095 14.185L6.13344 10.8225C6.12779 10.8073 6.12262 10.7917 6.11795 10.7758L4.64782 5.78023C4.59738 5.61449 4.55096 5.45386 4.50614 5.29878C4.36354 4.80529 4.23716 4.36794 4.04891 4.00075C3.82131 3.55681 3.61232 3.42822 3.34019 3.42822H2.71411C2.31972 3.42822 2 3.1085 2 2.71411Z"
+                                  fill="currentColor"/>
+                        </svg>
+                    </div>
 
-            <div class="cart-empty-title">Your Cart is Empty</div>
-            <div class="cart-empty-subtitle">
-                Fill your cart with amazing items
-            </div>
+                    <div class="cart-empty-title">Your Cart is Empty</div>
+                    <div class="cart-empty-subtitle">
+                        Fill your cart with amazing items
+                    </div>
 
-            <button class="cart-empty-btn" id="cart-shop-now">
-                Shop Now
-            </button>
-        </div>
-    `;
+                    <button class="cart-empty-btn" id="cart-shop-now">
+                        Shop Now
+                    </button>
+                </div>
+            `;
 
             const footer = document.getElementById("cart-footer");
             if (footer) footer.style.display = "none";

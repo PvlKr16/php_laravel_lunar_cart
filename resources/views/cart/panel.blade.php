@@ -2,7 +2,9 @@
 
 <div id="cart-panel" aria-hidden="true">
     <div id="cart-header">
-        <strong>Review Your Cart</strong>
+        <strong id="cart-title">
+            Review Your Cart <span id="cart-title-count"></span>
+        </strong>
         <button id="cart-close" class="cart-close-btn" aria-label="Close cart">
             <svg width="20" height="20"
                  viewBox="0 0 24 24"
