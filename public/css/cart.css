@@ -70,18 +70,17 @@
 
 #cart-header {
     padding: 15px;
-    /*border-bottom: 1px solid #ddd;*/
     display:flex;
     justify-content:space-between;
 }
 
 #cart-title {
-    font-weight: 500;
-    font-size: 15px;
+    font-weight: 600;
+    font-size: 16px;
 }
 
 #cart-title-count {
-    font-weight: 400;
+    font-weight: 600;
     opacity: 0.6;
 }
 
@@ -94,9 +93,13 @@
 .cart-item {
     display:flex;
     gap:10px;
-    /*border-bottom:1px solid #eee;*/
     padding-bottom:10px;
     margin-bottom:10px;
+}
+
+.cart-item-title {
+    font-weight: 600;
+    font-size: 14px;
 }
 
 .cart-item img {
@@ -108,7 +111,6 @@
 #cart-footer {
     padding:15px;
     height:173.6px;
-    /*border-top:1px solid #ddd;*/
 }
 
 .price-loading {
@@ -199,20 +201,20 @@
     justify-content:space-between;
     align-items:center;
     width:100%;
+    padding-top:10px;
 }
 
 .cart-footer-msg {
     font-size: 13px;
     opacity: .8;
-}
-
-.cart-title {
-    font-weight: 500;
-    font-size: 15px;
+    padding-bottom:10px;
 }
 
 .line-total_value {
-    font-weight: bold;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: right;
 }
 
 .fkcart-toggler {
@@ -296,7 +298,6 @@
 }
 
 #fkcart-checkout-button:hover {
-    /*background: #222;*/
     filter: brightness(115%);
 }
 
@@ -423,7 +424,7 @@
     left: 0;
     right: 0;
 
-    top: var(--coupon-header-h);   /* ← АВТО */
+    top: var(--coupon-header-h);
 
     padding: 8px 15px 12px;
     background: #fff;
@@ -440,8 +441,6 @@
     transform: translateY(0);
     pointer-events: auto;
 }
-
-
 
 .coupon-bottom {
     height: 1px;

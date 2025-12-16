@@ -176,7 +176,7 @@
 
                     <div style="flex-grow:1;">
                         <div class="cart-item-header">
-                            <div class="cart-title">${item.product?.name ?? "Product"}</div>
+                            <div class="cart-item-title">${item.product?.name ?? "Product"}</div>
                             <div class="line-total" id="line-total-${lineId}">
                                 ${formatWithCurrency(item.line_total, currency)}
                             </div>
