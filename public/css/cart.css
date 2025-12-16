@@ -393,12 +393,10 @@
     color: #d32f2f;
 }
 
-/* === LAYOUT === */
 #coupon-wrapper {
     position: relative;
 }
 
-/* === TOP (двигается) === */
 .coupon-top {
     position: relative;
 
@@ -408,7 +406,6 @@
     transition: transform 0.3s ease;
 }
 
-/* === HEADER === */
 .coupon-toggle {
     height: 48px;
 
@@ -420,9 +417,14 @@
     cursor: pointer;
 }
 
-/* === FORM === */
 .coupon-form {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 48px;
+
     padding: 8px 15px 12px;
+    background: #fff;
 
     opacity: 0;
     transform: translateY(8px);
@@ -431,24 +433,23 @@
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
+
 .coupon-form.is-open {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
 }
 
-/* === BOTTOM BORDER (НЕ ДВИГАЕТСЯ) === */
+
 .coupon-bottom {
     height: 1px;
     background: #e0e0e0;
 }
 
-/* === OPEN STATE === */
 #coupon-wrapper.is-open .coupon-top {
     transform: translateY(-64px);
 }
 
-/* === ARROW === */
 .coupon-arrow {
     transition: transform 0.3s;
 }
