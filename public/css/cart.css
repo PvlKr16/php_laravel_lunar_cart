@@ -17,8 +17,8 @@
 #cart-panel {
     position: fixed;
     top: 0;
-    right: -380px;
-    width: 360px;
+    right: -460px;
+    width: 440px;
     max-width: 100%;
     height: 100vh;
     background: #fff;
@@ -107,7 +107,8 @@
 
 #cart-footer {
     padding:15px;
-    border-top:1px solid #ddd;
+    height:173.6px;
+    /*border-top:1px solid #ddd;*/
 }
 
 .price-loading {
@@ -126,9 +127,10 @@
 }
 
 .cart-thumb {
-    width:60px;
-    height:60px;
+    width:58px;
+    height:58px;
     border:1px solid #ccc;
+    border-radius: 10%;
     position:relative;
     flex-shrink:0;
 }
@@ -389,4 +391,68 @@
 
 .cart-close-btn:hover {
     color: #d32f2f;
+}
+
+/* === LAYOUT === */
+#coupon-wrapper {
+    position: relative;
+}
+
+/* === TOP (двигается) === */
+.coupon-top {
+    position: relative;
+
+    border-top: 1px solid #e0e0e0;
+    background: #fff;
+
+    transition: transform 0.3s ease;
+}
+
+/* === HEADER === */
+.coupon-toggle {
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 15px;
+    cursor: pointer;
+}
+
+/* === FORM === */
+.coupon-form {
+    padding: 8px 15px 12px;
+
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.coupon-form.is-open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* === BOTTOM BORDER (НЕ ДВИГАЕТСЯ) === */
+.coupon-bottom {
+    height: 1px;
+    background: #e0e0e0;
+}
+
+/* === OPEN STATE === */
+#coupon-wrapper.is-open .coupon-top {
+    transform: translateY(-64px);
+}
+
+/* === ARROW === */
+.coupon-arrow {
+    transition: transform 0.3s;
+}
+
+#coupon-wrapper.is-open .coupon-arrow {
+    transform: rotate(180deg);
 }

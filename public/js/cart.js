@@ -204,45 +204,34 @@
 
         // COUPON TOGGLE BLOCK (only once)
         let couponWrapper = document.getElementById("coupon-wrapper");
+
         if (!couponWrapper) {
             couponWrapper = document.createElement("div");
             couponWrapper.id = "coupon-wrapper";
-            couponWrapper.style.marginBottom = "12px";
-            couponWrapper.style.cursor = "pointer";
 
             couponWrapper.innerHTML = `
-        <div id="coupon-toggle" style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:8px 0;
-            user-select:none;
-        ">
-            <span>Got a discount code?</span>
-            <span id="coupon-arrow" style="transition:0.3s;">▼</span>
-        </div>
+                <div class="coupon-top">
 
-        <div id="coupon-form" style="
-            display:none;
-            overflow:hidden;
-            transition:max-height 0.3s ease;
-            max-height:0;
-        ">
-            <div style="display:flex; gap:6px; margin-top:8px;">
-                <input type="text"
-                    id="coupon-input"
-                    placeholder="Coupon code"
-                    style="flex:1; padding:6px; border:1px solid #ccc;">
-                <button id="coupon-apply" style="
-                    padding:6px 12px;
-                    background:#333;
-                    color:#fff;
-                    border:none;
-                    cursor:pointer;
-                ">Apply</button>
-            </div>
-        </div>
-    `;
+                    <div id="coupon-toggle" class="coupon-toggle">
+                        <span>Got a discount code?</span>
+                        <span id="coupon-arrow" class="coupon-arrow">▼</span>
+                    </div>
+
+                    <div id="coupon-form" class="coupon-form">
+                        <div class="coupon-form-row">
+                            <input
+                                type="text"
+                                placeholder="Coupon code"
+                                class="coupon-input"
+                            >
+                            <button class="coupon-apply">Apply</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="coupon-bottom"></div>
+            `;
 
             totalBox.parentNode.insertBefore(couponWrapper, totalBox);
 
@@ -250,28 +239,14 @@
             const toggleBtn = document.getElementById("coupon-toggle");
             const form = document.getElementById("coupon-form");
             const arrow = document.getElementById("coupon-arrow");
-            const applyBtn = document.getElementById("coupon-apply");
+            const wrapper = document.getElementById("coupon-wrapper");
 
             toggleBtn.onclick = () => {
-                const isOpen = form.style.display === "block";
-
-                if (isOpen) {
-                    // CLOSE
-                    form.style.maxHeight = "0";
-                    setTimeout(() => (form.style.display = "none"), 200);
-                    arrow.textContent = "▼";
-                } else {
-                    // OPEN
-                    form.style.display = "block";
-                    setTimeout(() => (form.style.maxHeight = "80px"), 10);
-                    arrow.textContent = "▲";
-                }
-            };
-
-            applyBtn.onclick = () => {
-                alert("Under construction");
+                const open = wrapper.classList.toggle("is-open");
+                form.classList.toggle("is-open", open);
             };
         }
+
 
         totalBox.innerHTML = `
             <div class="cart-total-row">
