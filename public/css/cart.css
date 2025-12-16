@@ -452,11 +452,21 @@
     transform: translateY(-64px);
 }
 
-.coupon-arrow {
-    transition: transform 0.3s;
+.coupon-text {
+    font-size: 14px;
+    font-weight: 600;
 }
 
-#coupon-wrapper.is-open .coupon-arrow {
+.coupon-arrow {
+    display: flex;
+    align-items: center;
+}
+
+.fkcart-arrow-icon {
+    transition: transform 0.3s ease;
+}
+
+#coupon-wrapper.is-open .fkcart-arrow-icon {
     transform: rotate(180deg);
 }
 

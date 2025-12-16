@@ -231,8 +231,16 @@
                 <div class="coupon-top">
 
                     <div id="coupon-toggle" class="coupon-toggle">
-                        <span>Got a discount code?</span>
-                        <span id="coupon-arrow" class="coupon-arrow">▼</span>
+                        <span class="coupon-text">Got a discount code?</span>
+                        <span id="coupon-arrow" class="coupon-arrow">
+                            <svg width="16" height="16" viewBox="0 0 24 24"
+                                 class="fkcart-arrow-icon"
+                                 fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.21967 7.21967C2.51256 6.92678 2.98744 6.92678 3.28033 7.21967L12 15.9393L20.7197 7.21967C21.0126 6.92678 21.4874 6.92678 21.7803 7.21967C22.0732 7.51256 22.0732 7.98744 21.7803 8.28033L12.5303 17.5303C12.2374 17.8232 11.7626 17.8232 11.4697 17.5303L2.21967 8.28033C1.92678 7.98744 1.92678 7.51256 2.21967 7.21967Z"
+                                      fill="currentColor"/>
+                            </svg>
+                        </span>
                     </div>
 
                     <div id="coupon-form" class="coupon-form">
