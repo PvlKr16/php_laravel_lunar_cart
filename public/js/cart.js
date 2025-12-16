@@ -182,18 +182,36 @@
                             </div>
                         </div>
 
-                        <div class="cart-qty-row">
-                            <button data-action="decrease" data-id="${lineId}" class="cart-qty-btn">−</button>
+                        <div class="fkcart-quantity-selector" data-id="${lineId}">
 
-                            <input type="number"
-                                id="qty-input-${lineId}"
-                                value="${item.quantity ?? 1}"
-                                min="1"
-                                class="qty-input"
-                                data-line-id="${lineId}">
-
-                            <button data-action="increase" data-id="${lineId}" class="cart-qty-btn">+</button>
+                        <div class="fkcart-quantity-button fkcart-quantity-down" data-action="down">
+                            <svg aria-hidden="true" focusable="false" role="presentation"
+                                 class="fkcart-icon" viewBox="0 0 20 20">
+                                <path fill="currentColor"
+                                      d="M17.543 11.029H2.1A1.032 1.032 0 0 1 1.071 10c0-.566.463-1.029 1.029-1.029h15.443c.566 0 1.029.463 1.029 1.029 0 .566-.463 1.029-1.029 1.029z"/>
+                            </svg>
                         </div>
+
+                        <input
+                            class="fkcart-quantity__input"
+                            type="text"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            value="${item.quantity ?? 1}"
+                            data-line-id="${lineId}"
+                            aria-label="Quantity"
+                        >
+
+                        <div class="fkcart-quantity-button fkcart-quantity-up" data-action="up">
+                            <svg aria-hidden="true" focusable="false" role="presentation"
+                                 class="fkcart-icon" viewBox="0 0 20 20">
+                                <path fill="currentColor"
+                                      d="M17.409 8.929h-6.695V2.258c0-.566-.506-1.029-1.071-1.029s-1.071.463-1.071 1.029v6.671H1.967C1.401 8.929.938 9.435.938 10s.463 1.071 1.029 1.071h6.605V17.7c0 .566.506 1.029 1.071 1.029s1.071-.463 1.071-1.029v-6.629h6.695c.566 0 1.029-.506 1.029-1.071s-.463-1.071-1.029-1.071z"/>
+                            </svg>
+                        </div>
+
+                    </div>
+
                     </div>
 
                 </div>
@@ -511,39 +529,51 @@
         const btn = e.target.closest("[data-action]");
         if (!btn) return;
 
-        const id = btn.dataset.id;
         const action = btn.dataset.action;
 
+        /* === REMOVE ITEM === */
         if (action === "remove") {
-            return removeFromCart(id);
+            const lineId = btn.dataset.id;
+            if (!lineId) return;
+            return removeFromCart(lineId);
         }
 
-        const input = document.getElementById("qty-input-" + id);
+        /* === QTY CONTROLS (+ / −) === */
+        const wrapper = btn.closest(".fkcart-quantity-selector");
+        if (!wrapper) return;
+
+        const lineId = wrapper.dataset.id;
+        const input = wrapper.querySelector(".fkcart-quantity__input");
         if (!input) return;
 
-        let qty = parseInt(input.value, 10);
+        let qty = parseInt(input.value || 0, 10);
 
-        if (action === "increase") qty++;
-        else if (action === "decrease") {
-            if (qty <= 1) return removeFromCart(id);
+        if (action === "up") {
+            qty++;
+        } else if (action === "down") {
+            if (qty <= 1) return removeFromCart(lineId);
             qty--;
+        } else {
+            return;
         }
 
         input.value = qty;
-        await updateCartQty(id, qty);
+        await updateCartQty(lineId, qty);
     });
+
 
     itemsBox.addEventListener("change", async function (e) {
-        if (!e.target.classList.contains('qty-input')) return;
+        if (!e.target.classList.contains("fkcart-quantity__input")) return;
 
-        const id = e.target.dataset.lineId;
-        let val = parseInt(e.target.value || 0, 10);
+        const lineId = e.target.dataset.lineId;
+        let qty = parseInt(e.target.value || 0, 10);
 
-        if (val < 1) return removeFromCart(id);
+        if (qty < 1) return removeFromCart(lineId);
 
-        e.target.value = val;
-        await updateCartQty(id, val);
+        e.target.value = qty;
+        await updateCartQty(lineId, qty);
     });
+
 
     /*
     / Init

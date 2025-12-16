@@ -98,8 +98,9 @@
 }
 
 .cart-item-title {
-    font-weight: 600;
-    font-size: 14px;
+    font-weight:600;
+    font-size:14px;
+    padding-bottom:10px;
 }
 
 .cart-item img {
@@ -457,4 +458,46 @@
 
 #coupon-wrapper.is-open .coupon-arrow {
     transform: rotate(180deg);
+}
+
+/* === Quantity selector === */
+.fkcart-quantity-selector {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 25px;
+    background: #fff;
+}
+
+.fkcart-quantity-button {
+    width: 25px;
+    /*height: 30px;*/
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+    color: #303545;
+}
+
+.fkcart-quantity-button:hover {
+    background: #f1f1f1;
+}
+
+.fkcart-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.fkcart-quantity__input {
+    width: 25px;
+    height: 100%;
+    border: 1px solid #ddd;
+    text-align: center;
+    font-size: 14px;
+    outline: none;
 }
