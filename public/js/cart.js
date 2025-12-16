@@ -240,13 +240,40 @@
             const form = document.getElementById("coupon-form");
             const arrow = document.getElementById("coupon-arrow");
             const wrapper = document.getElementById("coupon-wrapper");
+            const applyBtn = document.querySelector(".coupon-apply");
+
+            if (applyBtn) {
+                applyBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    alert("Under construction");
+                });
+            }
 
             toggleBtn.onclick = () => {
                 const open = wrapper.classList.toggle("is-open");
                 form.classList.toggle("is-open", open);
             };
-        }
 
+            (function initCouponAutoOffset() {
+                const wrapper = document.getElementById("coupon-wrapper");
+                if (!wrapper) return;
+
+                const header = wrapper.querySelector(".coupon-toggle");
+                if (!header) return;
+
+                function updateOffset() {
+                    const h = header.offsetHeight;
+                    wrapper.style.setProperty("--coupon-header-h", h + "px");
+                }
+
+                // initial
+                updateOffset();
+
+                // на случай изменения шрифтов / responsive
+                window.addEventListener("resize", updateOffset);
+            })();
+
+        }
 
         totalBox.innerHTML = `
             <div class="cart-total-row">

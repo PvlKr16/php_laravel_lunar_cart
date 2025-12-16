@@ -395,6 +395,7 @@
 
 #coupon-wrapper {
     position: relative;
+    --coupon-header-h: 48px;
 }
 
 .coupon-top {
@@ -421,7 +422,8 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: 48px;
+
+    top: var(--coupon-header-h);   /* ← АВТО */
 
     padding: 8px 15px 12px;
     background: #fff;
@@ -433,12 +435,12 @@
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-
 .coupon-form.is-open {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
 }
+
 
 
 .coupon-bottom {
