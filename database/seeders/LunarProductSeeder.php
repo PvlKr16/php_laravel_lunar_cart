@@ -191,7 +191,7 @@ class LunarProductSeeder extends Seeder
             ]);
 
             $product
-                ->addMedia(database_path('seeders/images/IMG_9327.jpg'))
+                ->addMedia(database_path('seeders/images/IMG_9327.JPG'))
                 ->preservingOriginal()
                 ->toMediaCollection('images');
 
