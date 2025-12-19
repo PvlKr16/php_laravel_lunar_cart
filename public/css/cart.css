@@ -140,6 +140,14 @@
     flex-shrink:0;
 }
 
+.cart-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+
 .cart-remove-btn {
     position: absolute;
     top: -8px;

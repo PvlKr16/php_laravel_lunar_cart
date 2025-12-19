@@ -58,6 +58,10 @@ class CartController extends Controller
                         'name' => $line->purchasable
                             ->product
                             ->translateAttribute('name'),
+                        'image' => $line->purchasable
+                            ->product
+                            ->getFirstMediaUrl('images'),
+
                     ],
                 ];
             }),
