@@ -302,15 +302,20 @@
         }
 
         totalBox.innerHTML = `
-            <div class="cart-total-row">
-                <span class="label">Subotal:</span>
-                <span class="line-total_value" id="cart-total-value">
-                    ${formatWithCurrency(data.total?.formatted ?? data.total, currency)}
-                </span>
-            </div>
+            <div class="cart-total">
+                <div class="cart-total-row">
+                    <span class="cart-total-label">Subtotal</span>
+                    <span class="cart-total-value" id="cart-total-value">
+                        ${formatWithCurrency(data.total?.formatted ?? data.total, currency)}
+                    </span>
+                </div>
 
-            <div class="cart-footer-msg">Shipping & taxes may be re-calculated at checkout</div>
+                <div class="cart-footer-msg">
+                    Shipping & taxes may be re-calculated at checkout
+                </div>
+            </div>
         `;
+
         const checkoutBtn = document.getElementById("fkcart-checkout-button");
         if (checkoutBtn) checkoutBtn.style.display = "flex";
 

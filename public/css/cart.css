@@ -110,8 +110,10 @@
 }
 
 #cart-footer {
-    padding:15px;
-    height:173.6px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .price-loading {
@@ -197,40 +199,57 @@
     text-align:center;
 }
 
+.cart-total {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 .cart-total-row {
     display:flex;
     justify-content:space-between;
     align-items:center;
     width:100%;
-    padding-top:10px;
+    /*padding-top:10px;*/
+}
+
+.cart-total-label {
+    font-size:15px;
+    font-weight:500;
+    color:#303545;
+}
+
+.cart-total-value {
+    font-size:14px;
+    font-weight:600;
 }
 
 .cart-footer-msg {
-    font-size: 13px;
-    opacity: .8;
-    padding-bottom:10px;
+    font-size:13px;
+    line-height:1.4;
+    /*opacity: .8;*/
+    /*padding-bottom:10px;*/
 }
 
 .line-total_value {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.5;
-    text-align: right;
+    font-size:14px;
+    font-weight:400;
+    line-height:1.5;
+    text-align:right;
 }
 
 .fkcart-toggler {
-    position: fixed;
-    right: 24px;
-    bottom: 24px;
-    z-index: 9999;
-    background: #111;
-    color: #fff;
-    padding: 14px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position:fixed;
+    right:24px;
+    bottom:24px;
+    z-index:9999;
+    background:#111;
+    color:#fff;
+    padding:14px;
+    border-radius:50%;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     box-shadow: 0 4px 14px rgba(0,0,0,0.25);
 }
 
@@ -288,7 +307,7 @@
     gap: 10px;
 
     width: 100%;
-    padding: 16px;
+    padding: 8px 24px;
 
     background: #303545;
     color: #fff;
@@ -315,7 +334,7 @@
 }
 
 .fkcart-checkout--text {
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 500;
     align-items: center;
 }
@@ -398,6 +417,8 @@
 #coupon-wrapper {
     position: relative;
     --coupon-header-h: 48px;
+    margin-left: -16px;
+    margin-right: -16px;
 }
 
 .coupon-top {
