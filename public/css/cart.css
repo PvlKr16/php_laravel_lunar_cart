@@ -138,28 +138,37 @@
     border-radius: 10%;
     position:relative;
     flex-shrink:0;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart-thumb-img {
+    max-width: 58px;
+    max-height: 58px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid #eee;
 }
 
 .cart-remove-btn {
     position: absolute;
     top: -8px;
     left: -8px;
-
     width: 18px;
     height: 18px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border: none;
     background: #dedfea;
     color: #262930;
-
     border-radius: 50%;
     cursor: pointer;
     z-index: 10;
-
     padding: 0;
 }
 
