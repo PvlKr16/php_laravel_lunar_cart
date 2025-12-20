@@ -276,6 +276,7 @@
             const arrow = document.getElementById("coupon-arrow");
             const wrapper = document.getElementById("coupon-wrapper");
             const applyBtn = document.querySelector(".coupon-apply");
+            const input = form.querySelector(".coupon-input");
 
             if (applyBtn) {
                 applyBtn.addEventListener("click", function (e) {
@@ -287,7 +288,14 @@
             toggleBtn.onclick = () => {
                 const open = wrapper.classList.toggle("is-open");
                 form.classList.toggle("is-open", open);
+
+                if (open) {
+                    setTimeout(() => {
+                        input.focus();
+                    }, 200); // соответствует CSS transition
+                }
             };
+
 
             (function initCouponAutoOffset() {
                 const wrapper = document.getElementById("coupon-wrapper");
