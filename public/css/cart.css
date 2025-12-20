@@ -269,7 +269,7 @@
     /*padding-bottom:10px;*/
 }
 
-.line-total_value {
+.line-total {
     font-size:14px;
     font-weight:400;
     line-height:1.5;
@@ -625,6 +625,8 @@
     height: 100%;
     border: 1px solid #ddd;
     text-align: center;
+    font-family: 'Montserrat', sans-serif;
     font-size: 14px;
+    font-weight: 400;
     outline: none;
 }
