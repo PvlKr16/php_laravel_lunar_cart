@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<header style="padding:10px; background:#eee; display:flex; justify-content:space-between;">
+<header class="index-header">
     <div>Store</div>
 
     <div id="fkcart-mini-toggler" class="fkcart-shortcode-container fkcart-mini-open fkcart-mini-toggler">
@@ -24,7 +24,7 @@
     </div>
 </header>
 
-<main style="padding:20px;">
+<main class="index-main">
     @yield('content')
 </main>
 

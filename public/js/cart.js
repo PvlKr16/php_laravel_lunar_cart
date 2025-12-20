@@ -292,7 +292,7 @@
                 if (open) {
                     setTimeout(() => {
                         input.focus();
-                    }, 200); // соответствует CSS transition
+                    }, 100);
                 }
             };
 

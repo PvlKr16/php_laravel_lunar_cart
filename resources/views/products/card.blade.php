@@ -5,7 +5,7 @@
     $stock   = $variant->stock;
 @endphp
 
-<div style="border:1px solid #ddd; padding:15px; text-align:center;">
+<div class="index-card">
     <h3>{{ $product->translateAttribute('name') }}</h3>
 
     <img src="{{ $product->media->first()->getUrl() }}" alt="{{ $product->translate('name') }}"
@@ -27,7 +27,6 @@
         >
         <div
             id="msg-{{ $variant->id }}" style="color:red; font-size:14px;">
-
         </div>
     </label>
 
