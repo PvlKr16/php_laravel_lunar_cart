@@ -41,7 +41,7 @@ class CartController extends Controller
         $cart = $this->getCart();
 
         $cart->calculate();
-        $cart->load('lines.purchasable.product');
+        $cart->load('lines.purchasable.product.media');
 
         return response()->json([
             'id' => $cart->id,
@@ -49,6 +49,9 @@ class CartController extends Controller
             'items' => $cart->lines->map(function ($line) {
                 $price = $line->purchasable->prices->first()->price->value;
                 $lineTotal = number_format(($price * $line->quantity) / 100, 2);
+
+                $image = $line->purchasable->product->media->first();
+                $imageUrl = $image ? $image->getUrl() : null;
 
                 return [
                     'id' => $line->id,
@@ -58,9 +61,7 @@ class CartController extends Controller
                         'name' => $line->purchasable
                             ->product
                             ->translateAttribute('name'),
-                        'image' => $line->purchasable
-                            ->product
-                            ->getFirstMediaUrl('images'),
+                        'image' => $imageUrl,
 
                     ],
                 ];
