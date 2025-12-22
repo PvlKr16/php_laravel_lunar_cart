@@ -3,9 +3,10 @@ Laravel 12.0
 Lunar 1.0
 
 before running $ php artisan serve:
-- add DB password to .env
+- composer install
+-  cp .env.example .env
+  - add DB name, DB username and password to .env
+- php artisan key:generate
 - run $ php artisan migrate
 - run  $ php artisan db:seed --class=LunarProductSeeder
-  windows:
-- php artisan media-library:regenerate
 - php artisan storage:link
